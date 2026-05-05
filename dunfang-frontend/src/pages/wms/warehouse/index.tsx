@@ -1,85 +1,97 @@
 import { PlusOutlined } from '@ant-design/icons';
-import type { ActionType, ProColumns } from '@ant-design/pro-components';
-import { PageContainer, ProTable } from '@ant-design/pro-components';
-import { Button, message, Popconfirm } from 'antd';
-import React, { useRef, useState } from 'react';
 import {
-  queryWarehouseList,
+  ModalForm,
+  PageContainer,
+  ProFormText,
+  ProFormTextArea,
+  ProTable,
+} from '@ant-design/pro-components';
+import type { ActionType, ProColumns } from '@ant-design/pro-components';
+import { Button, Popconfirm, message } from 'antd';
+import React, { useRef, useState } from 'react';
+
+import {
   addWarehouse,
-  updateWarehouse,
   deleteWarehouse,
+  queryWarehouseList,
+  updateWarehouse,
 } from '@/services/dunfang/warehouse';
-import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-components';
 
 const WarehouseList: React.FC = () => {
-  const actionRef = useRef<ActionType>();
-  const [createModalVisible, handleModalVisible] = useState<boolean>(false);
-  const [updateModalVisible, handleUpdateModalVisible] = useState<boolean>(false);
-  const [currentRow, setCurrentRow] = useState<any>();
+  const actionRef = useRef<ActionType | null>(null);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [currentRow, setCurrentRow] = useState<API.WarehouseRecord | undefined>();
 
-  const handleAdd = async (fields: any) => {
-    const hide = message.loading('正在添加');
+  const reloadTable = () => {
+    actionRef.current?.reload();
+  };
+
+  const handleAdd = async (fields: Partial<API.WarehouseRecord>) => {
+    const hide = message.loading('正在创建仓库');
     try {
-      await addWarehouse({ ...fields });
+      await addWarehouse(fields);
       hide();
-      message.success('添加成功');
+      message.success('仓库已创建');
+      reloadTable();
       return true;
-    } catch (error) {
+    } catch {
       hide();
-      message.error('添加失败请重试！');
+      message.error('创建失败，请重试');
       return false;
     }
   };
 
-  const handleUpdate = async (fields: any) => {
-    const hide = message.loading('正在更新');
+  const handleUpdate = async (fields: Partial<API.WarehouseRecord>) => {
+    if (!currentRow?.id) {
+      return false;
+    }
+
+    const hide = message.loading('正在更新仓库');
     try {
-      await updateWarehouse(currentRow.id, { ...fields });
+      await updateWarehouse(currentRow.id, fields);
       hide();
-      message.success('更新成功');
+      message.success('仓库已更新');
+      reloadTable();
       return true;
-    } catch (error) {
+    } catch {
       hide();
-      message.error('更新失败请重试！');
+      message.error('更新失败，请重试');
       return false;
     }
   };
 
-  const handleRemove = async (id: string) => {
-    const hide = message.loading('正在删除');
+  const handleRemove = async (id: number) => {
+    const hide = message.loading('正在删除仓库');
     try {
       await deleteWarehouse(id);
       hide();
-      message.success('删除成功');
-      if (actionRef.current) {
-        actionRef.current.reload();
-      }
-      return true;
-    } catch (error) {
+      message.success('仓库已删除');
+      reloadTable();
+    } catch {
       hide();
       message.error('删除失败，请重试');
-      return false;
     }
   };
 
-  const columns: ProColumns<any>[] = [
+  const columns: ProColumns<API.WarehouseRecord>[] = [
     {
       title: '仓库名称',
       dataIndex: 'name',
       formItemProps: {
-        rules: [{ required: true, message: '此项为必填项' }],
+        rules: [{ required: true, message: '请输入仓库名称' }],
       },
     },
     {
       title: '仓库地址',
       dataIndex: 'address',
-      hideInSearch: true,
+      search: false,
     },
     {
       title: '备注',
       dataIndex: 'remark',
       valueType: 'textarea',
-      hideInSearch: true,
+      search: false,
     },
     {
       title: '操作',
@@ -90,14 +102,14 @@ const WarehouseList: React.FC = () => {
           key="edit"
           onClick={() => {
             setCurrentRow(record);
-            handleUpdateModalVisible(true);
+            setUpdateModalOpen(true);
           }}
         >
           编辑
         </a>,
         <Popconfirm
           key="delete"
-          title="确定删除吗？"
+          title="确认删除这个仓库吗？"
           onConfirm={() => handleRemove(record.id)}
         >
           <a style={{ color: 'red' }}>删除</a>
@@ -108,48 +120,38 @@ const WarehouseList: React.FC = () => {
 
   return (
     <PageContainer>
-      <ProTable<any, API.PageParams>
+      <ProTable<API.WarehouseRecord, API.PageParams>
         headerTitle="仓库列表"
         actionRef={actionRef}
         rowKey="id"
-        search={{
-          labelWidth: 120,
-        }}
+        search={{ labelWidth: 120 }}
         toolBarRender={() => [
-          <Button
-            type="primary"
-            key="primary"
-            onClick={() => {
-              handleModalVisible(true);
-            }}
-          >
+          <Button key="create" type="primary" onClick={() => setCreateModalOpen(true)}>
             <PlusOutlined /> 新建仓库
           </Button>,
         ]}
         request={async (params) => {
           const res = await queryWarehouseList(params);
           return {
-            data: res.data?.records || [],
-            success: true,
-            total: res.data?.total || 0,
+            data: res.data?.records ?? [],
+            success: res.code === 200,
+            total: res.data?.total ?? 0,
           };
         }}
         columns={columns}
       />
 
-      <ModalForm
+      <ModalForm<Partial<API.WarehouseRecord>>
         title="新建仓库"
-        width="500px"
-        visible={createModalVisible}
-        onVisibleChange={handleModalVisible}
-        onFinish={async (value) => {
-          const success = await handleAdd(value);
+        width={520}
+        open={createModalOpen}
+        onOpenChange={setCreateModalOpen}
+        onFinish={async (values) => {
+          const success = await handleAdd(values);
           if (success) {
-            handleModalVisible(false);
-            if (actionRef.current) {
-              actionRef.current.reload();
-            }
+            setCreateModalOpen(false);
           }
+          return success;
         }}
       >
         <ProFormText name="name" label="仓库名称" rules={[{ required: true }]} />
@@ -157,29 +159,30 @@ const WarehouseList: React.FC = () => {
         <ProFormTextArea name="remark" label="备注" />
       </ModalForm>
 
-      {currentRow && Object.keys(currentRow).length ? (
-        <ModalForm
-          title="编辑仓库"
-          width="500px"
-          visible={updateModalVisible}
-          onVisibleChange={handleUpdateModalVisible}
-          initialValues={currentRow}
-          onFinish={async (value) => {
-            const success = await handleUpdate(value);
-            if (success) {
-              handleUpdateModalVisible(false);
-              setCurrentRow(undefined);
-              if (actionRef.current) {
-                actionRef.current.reload();
-              }
-            }
-          }}
-        >
-          <ProFormText name="name" label="仓库名称" rules={[{ required: true }]} />
-          <ProFormText name="address" label="仓库地址" />
-          <ProFormTextArea name="remark" label="备注" />
-        </ModalForm>
-      ) : null}
+      <ModalForm<Partial<API.WarehouseRecord>>
+        title="编辑仓库"
+        width={520}
+        open={updateModalOpen}
+        onOpenChange={(open) => {
+          setUpdateModalOpen(open);
+          if (!open) {
+            setCurrentRow(undefined);
+          }
+        }}
+        initialValues={currentRow}
+        onFinish={async (values) => {
+          const success = await handleUpdate(values);
+          if (success) {
+            setUpdateModalOpen(false);
+            setCurrentRow(undefined);
+          }
+          return success;
+        }}
+      >
+        <ProFormText name="name" label="仓库名称" rules={[{ required: true }]} />
+        <ProFormText name="address" label="仓库地址" />
+        <ProFormTextArea name="remark" label="备注" />
+      </ModalForm>
     </PageContainer>
   );
 };

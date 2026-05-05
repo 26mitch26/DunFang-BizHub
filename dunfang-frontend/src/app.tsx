@@ -2,27 +2,24 @@ import { LinkOutlined } from '@ant-design/icons';
 import type { Settings as LayoutSettings } from '@ant-design/pro-components';
 import { SettingDrawer } from '@ant-design/pro-components';
 import type { RequestConfig, RunTimeLayoutConfig } from '@umijs/max';
-import { history, Link } from '@umijs/max';
+import { Link, history } from '@umijs/max';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import React from 'react';
 
-// Initialize dayjs plugins globally
-dayjs.extend(relativeTime);
-
+import { AvatarDropdown, Footer } from '@/components';
 import {
-  AvatarDropdown,
-  Footer,
-} from '@/components';
+  clearAuthSession,
+  currentUser as fetchCurrentUser,
+} from '@/services/dunfang/auth';
 import defaultSettings from '../config/defaultSettings';
 import { errorConfig } from './requestErrorConfig';
+
+dayjs.extend(relativeTime);
 
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
 
-/**
- * @see https://umijs.org/docs/api/runtime-config#getinitialstate
- */
 export async function getInitialState(): Promise<{
   settings?: Partial<LayoutSettings>;
   currentUser?: API.CurrentUser;
@@ -32,13 +29,12 @@ export async function getInitialState(): Promise<{
 }> {
   const fetchUserInfo = async () => {
     try {
-      const tokenData = localStorage.getItem('dunfang_user');
       const accessToken = localStorage.getItem('dunfang_access_token');
-      if (tokenData && accessToken) {
-        return JSON.parse(tokenData) as API.CurrentUser;
+      if (accessToken) {
+        return await fetchCurrentUser();
       }
     } catch (_error) {
-      // ignore
+      clearAuthSession();
     }
     return undefined;
   };
@@ -69,7 +65,6 @@ export async function getInitialState(): Promise<{
   };
 }
 
-// ProLayout API: https://procomponents.ant.design/components/layout
 export const layout: RunTimeLayoutConfig = ({
   initialState,
   setInitialState,
@@ -88,7 +83,10 @@ export const layout: RunTimeLayoutConfig = ({
     actionsRender: () => [],
     avatarProps: {
       src: initialState?.currentUser?.avatar,
-      title: initialState?.currentUser?.nickname || 'User',
+      title:
+        initialState?.currentUser?.nickname ||
+        initialState?.currentUser?.name ||
+        'User',
       render: (_, avatarChildren) => (
         <AvatarDropdown>{avatarChildren}</AvatarDropdown>
       ),
@@ -164,10 +162,6 @@ export const layout: RunTimeLayoutConfig = ({
   };
 };
 
-/**
- * @name request 配置
- * Adds JWT Authorization header to all API requests.
- */
 export const request: RequestConfig = {
   baseURL: isDev ? '' : '',
   ...errorConfig,

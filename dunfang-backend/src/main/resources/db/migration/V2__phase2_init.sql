@@ -216,4 +216,4 @@ INSERT INTO gift_budget_rule (id, customer_level, festival_id, budget_limit) VAL
 
 -- 为现有客户添加等级信息 (假设 phase 1 customer 表需要加这个字段，但其实还没加)
 -- 修改 customer 表，增加等级字段
-ALTER TABLE customer ADD COLUMN level ENUM('A', 'B', 'C', 'D') DEFAULT 'C' COMMENT '客户等级' AFTER status;
+ALTER TABLE customer ADD COLUMN level ENUM('A', 'B', 'C', 'D') DEFAULT 'C' COMMENT '客户等级' AFTER tier;

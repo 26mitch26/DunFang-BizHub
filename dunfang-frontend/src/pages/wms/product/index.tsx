@@ -1,97 +1,109 @@
 import { PlusOutlined } from '@ant-design/icons';
-import type { ActionType, ProColumns } from '@ant-design/pro-components';
-import { PageContainer, ProTable } from '@ant-design/pro-components';
-import { Button, message, Popconfirm } from 'antd';
-import React, { useRef, useState } from 'react';
 import {
-  queryProductList,
+  ModalForm,
+  PageContainer,
+  ProFormText,
+  ProFormTextArea,
+  ProTable,
+} from '@ant-design/pro-components';
+import type { ActionType, ProColumns } from '@ant-design/pro-components';
+import { Button, Popconfirm, message } from 'antd';
+import React, { useRef, useState } from 'react';
+
+import {
   addProduct,
-  updateProduct,
   deleteProduct,
+  queryProductList,
+  updateProduct,
 } from '@/services/dunfang/product';
-import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-components';
 
 const ProductList: React.FC = () => {
-  const actionRef = useRef<ActionType>();
-  const [createModalVisible, handleModalVisible] = useState<boolean>(false);
-  const [updateModalVisible, handleUpdateModalVisible] = useState<boolean>(false);
-  const [currentRow, setCurrentRow] = useState<any>();
+  const actionRef = useRef<ActionType | null>(null);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [currentRow, setCurrentRow] = useState<API.ProductRecord | undefined>();
 
-  const handleAdd = async (fields: any) => {
-    const hide = message.loading('正在添加');
+  const reloadTable = () => {
+    actionRef.current?.reload();
+  };
+
+  const handleAdd = async (fields: Partial<API.ProductRecord>) => {
+    const hide = message.loading('正在创建商品');
     try {
-      await addProduct({ ...fields });
+      await addProduct(fields);
       hide();
-      message.success('添加成功');
+      message.success('商品已创建');
+      reloadTable();
       return true;
-    } catch (error) {
+    } catch {
       hide();
-      message.error('添加失败请重试！');
+      message.error('创建失败，请重试');
       return false;
     }
   };
 
-  const handleUpdate = async (fields: any) => {
-    const hide = message.loading('正在更新');
+  const handleUpdate = async (fields: Partial<API.ProductRecord>) => {
+    if (!currentRow?.id) {
+      return false;
+    }
+
+    const hide = message.loading('正在更新商品');
     try {
-      await updateProduct(currentRow.id, { ...fields });
+      await updateProduct(currentRow.id, fields);
       hide();
-      message.success('更新成功');
+      message.success('商品已更新');
+      reloadTable();
       return true;
-    } catch (error) {
+    } catch {
       hide();
-      message.error('更新失败请重试！');
+      message.error('更新失败，请重试');
       return false;
     }
   };
 
-  const handleRemove = async (id: string) => {
-    const hide = message.loading('正在删除');
+  const handleRemove = async (id: number) => {
+    const hide = message.loading('正在删除商品');
     try {
       await deleteProduct(id);
       hide();
-      message.success('删除成功');
-      if (actionRef.current) {
-        actionRef.current.reload();
-      }
-      return true;
-    } catch (error) {
+      message.success('商品已删除');
+      reloadTable();
+    } catch {
       hide();
       message.error('删除失败，请重试');
-      return false;
     }
   };
 
-  const columns: ProColumns<any>[] = [
+  const columns: ProColumns<API.ProductRecord>[] = [
     {
       title: 'SKU 编码',
       dataIndex: 'skuCode',
       formItemProps: {
-        rules: [{ required: true, message: '此项为必填项' }],
+        rules: [{ required: true, message: '请输入 SKU 编码' }],
       },
     },
     {
       title: '商品名称',
       dataIndex: 'name',
       formItemProps: {
-        rules: [{ required: true, message: '此项为必填项' }],
+        rules: [{ required: true, message: '请输入商品名称' }],
       },
     },
     {
       title: '规格型号',
       dataIndex: 'specifications',
-      hideInSearch: true,
+      search: false,
     },
     {
-      title: '计量单位',
+      title: '单位',
       dataIndex: 'unit',
-      hideInSearch: true,
+      search: false,
     },
     {
       title: '备注',
       dataIndex: 'remark',
       valueType: 'textarea',
-      hideInSearch: true,
+      search: false,
     },
     {
       title: '操作',
@@ -102,14 +114,14 @@ const ProductList: React.FC = () => {
           key="edit"
           onClick={() => {
             setCurrentRow(record);
-            handleUpdateModalVisible(true);
+            setUpdateModalOpen(true);
           }}
         >
           编辑
         </a>,
         <Popconfirm
           key="delete"
-          title="确定删除吗？"
+          title="确认删除这个商品吗？"
           onConfirm={() => handleRemove(record.id)}
         >
           <a style={{ color: 'red' }}>删除</a>
@@ -120,82 +132,73 @@ const ProductList: React.FC = () => {
 
   return (
     <PageContainer>
-      <ProTable<any, API.PageParams>
-        headerTitle="商品/SKU 列表"
+      <ProTable<API.ProductRecord, API.PageParams>
+        headerTitle="商品档案"
         actionRef={actionRef}
         rowKey="id"
-        search={{
-          labelWidth: 120,
-        }}
+        search={{ labelWidth: 120 }}
         toolBarRender={() => [
-          <Button
-            type="primary"
-            key="primary"
-            onClick={() => {
-              handleModalVisible(true);
-            }}
-          >
+          <Button key="create" type="primary" onClick={() => setCreateModalOpen(true)}>
             <PlusOutlined /> 新建商品
           </Button>,
         ]}
         request={async (params) => {
           const res = await queryProductList(params);
           return {
-            data: res.data?.records || [],
-            success: true,
-            total: res.data?.total || 0,
+            data: res.data?.records ?? [],
+            success: res.code === 200,
+            total: res.data?.total ?? 0,
           };
         }}
         columns={columns}
       />
 
-      <ModalForm
+      <ModalForm<Partial<API.ProductRecord>>
         title="新建商品"
-        width="500px"
-        visible={createModalVisible}
-        onVisibleChange={handleModalVisible}
-        onFinish={async (value) => {
-          const success = await handleAdd(value);
+        width={520}
+        open={createModalOpen}
+        onOpenChange={setCreateModalOpen}
+        onFinish={async (values) => {
+          const success = await handleAdd(values);
           if (success) {
-            handleModalVisible(false);
-            if (actionRef.current) {
-              actionRef.current.reload();
-            }
+            setCreateModalOpen(false);
           }
+          return success;
         }}
       >
         <ProFormText name="skuCode" label="SKU 编码" rules={[{ required: true }]} />
         <ProFormText name="name" label="商品名称" rules={[{ required: true }]} />
         <ProFormText name="specifications" label="规格型号" />
-        <ProFormText name="unit" label="计量单位 (如: 个, 台, 件)" />
+        <ProFormText name="unit" label="单位" />
         <ProFormTextArea name="remark" label="备注" />
       </ModalForm>
 
-      {currentRow && Object.keys(currentRow).length ? (
-        <ModalForm
-          title="编辑商品"
-          width="500px"
-          visible={updateModalVisible}
-          onVisibleChange={handleUpdateModalVisible}
-          initialValues={currentRow}
-          onFinish={async (value) => {
-            const success = await handleUpdate(value);
-            if (success) {
-              handleUpdateModalVisible(false);
-              setCurrentRow(undefined);
-              if (actionRef.current) {
-                actionRef.current.reload();
-              }
-            }
-          }}
-        >
-          <ProFormText name="skuCode" label="SKU 编码" rules={[{ required: true }]} />
-          <ProFormText name="name" label="商品名称" rules={[{ required: true }]} />
-          <ProFormText name="specifications" label="规格型号" />
-          <ProFormText name="unit" label="计量单位" />
-          <ProFormTextArea name="remark" label="备注" />
-        </ModalForm>
-      ) : null}
+      <ModalForm<Partial<API.ProductRecord>>
+        title="编辑商品"
+        width={520}
+        open={updateModalOpen}
+        onOpenChange={(open) => {
+          setUpdateModalOpen(open);
+          if (!open) {
+            setCurrentRow(undefined);
+          }
+        }}
+        initialValues={currentRow}
+        onFinish={async (values) => {
+          const success = await handleUpdate(values);
+          if (success) {
+            setUpdateModalOpen(false);
+            setCurrentRow(undefined);
+          }
+          return success;
+        }}
+      >
+        <ProFormText name="skuCode" label="SKU 编码" rules={[{ required: true }]} />
+        <ProFormText name="name" label="商品名称" rules={[{ required: true }]} />
+        <ProFormText name="specifications" label="规格型号" />
+        <ProFormText name="unit" label="单位" />
+        <ProFormTextArea name="remark" label="备注" />
+      </ModalForm>
     </PageContainer>
   );
 };

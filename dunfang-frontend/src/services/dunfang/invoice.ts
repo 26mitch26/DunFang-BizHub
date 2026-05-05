@@ -12,7 +12,7 @@ export async function parseInvoice(
   const formData = new FormData();
   formData.append('file', file);
   
-  return request<API.Result>('/api/invoices/parse', {
+  return request<API.Result<API.InvoiceRecord>>('/api/invoices/parse', {
     method: 'POST',
     data: formData,
     headers: {

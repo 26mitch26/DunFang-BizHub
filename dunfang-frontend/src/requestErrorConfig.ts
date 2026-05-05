@@ -12,8 +12,10 @@ enum ErrorShowType {
 }
 // 与后端约定的响应数据格式
 interface ResponseStructure {
-  success: boolean;
-  data: unknown;
+  success?: boolean;
+  code?: number;
+  message?: string;
+  data?: unknown;
   errorCode?: number;
   errorMessage?: string;
   showType?: ErrorShowType;
@@ -29,12 +31,29 @@ export const errorConfig: RequestConfig = {
   errorConfig: {
     // 错误抛出
     errorThrower: (res) => {
-      const { success, data, errorCode, errorMessage, showType } =
+      const {
+        success,
+        code,
+        message: responseMessage,
+        data,
+        errorCode,
+        errorMessage,
+        showType,
+      } =
         res as unknown as ResponseStructure;
-      if (!success) {
-        const error: any = new Error(errorMessage);
+      const isSuccess = typeof success === 'boolean' ? success : code === 200;
+      if (!isSuccess) {
+        const normalizedCode = errorCode ?? code ?? 500;
+        const normalizedMessage =
+          errorMessage ?? responseMessage ?? 'Request failed';
+        const error: any = new Error(normalizedMessage);
         error.name = 'BizError';
-        error.info = { errorCode, errorMessage, showType, data };
+        error.info = {
+          errorCode: normalizedCode,
+          errorMessage: normalizedMessage,
+          showType,
+          data,
+        };
         throw error; // 抛出自制的错误
       }
     },
@@ -88,9 +107,7 @@ export const errorConfig: RequestConfig = {
   // 请求拦截器
   requestInterceptors: [
     (config: RequestOptions) => {
-      // 拦截请求配置，进行个性化处理。
-      const url = config?.url?.concat('?token=123');
-      return { ...config, url };
+      return { ...config };
     },
   ],
 

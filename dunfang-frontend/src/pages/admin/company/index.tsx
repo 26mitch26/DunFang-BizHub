@@ -1,73 +1,86 @@
 import { PlusOutlined } from '@ant-design/icons';
-import type { ActionType, ProColumns } from '@ant-design/pro-components';
-import { PageContainer, ProTable } from '@ant-design/pro-components';
-import { Button, message, Popconfirm } from 'antd';
-import React, { useRef, useState } from 'react';
 import {
-  queryCompanyList,
+  ModalForm,
+  PageContainer,
+  ProFormSelect,
+  ProFormText,
+  ProFormTextArea,
+  ProTable,
+} from '@ant-design/pro-components';
+import type { ActionType, ProColumns } from '@ant-design/pro-components';
+import { Button, Popconfirm, message } from 'antd';
+import React, { useRef, useState } from 'react';
+
+import {
   addCompany,
-  updateCompany,
   deleteCompany,
+  queryCompanyList,
+  updateCompany,
 } from '@/services/dunfang/company';
-import { ModalForm, ProFormText, ProFormSelect, ProFormTextArea } from '@ant-design/pro-components';
 
 const CompanyList: React.FC = () => {
-  const actionRef = useRef<ActionType>();
-  const [createModalVisible, handleModalVisible] = useState<boolean>(false);
-  const [updateModalVisible, handleUpdateModalVisible] = useState<boolean>(false);
-  const [currentRow, setCurrentRow] = useState<any>();
+  const actionRef = useRef<ActionType | null>(null);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [currentRow, setCurrentRow] = useState<API.CompanyRecord | undefined>();
 
-  const handleAdd = async (fields: any) => {
-    const hide = message.loading('正在添加');
+  const reloadTable = () => {
+    actionRef.current?.reload();
+  };
+
+  const handleAdd = async (fields: Partial<API.CompanyRecord>) => {
+    const hide = message.loading('正在创建公司');
     try {
-      await addCompany({ ...fields });
+      await addCompany(fields);
       hide();
-      message.success('添加成功');
+      message.success('公司已创建');
+      reloadTable();
       return true;
-    } catch (error) {
+    } catch {
       hide();
-      message.error('添加失败请重试！');
+      message.error('创建失败，请重试');
       return false;
     }
   };
 
-  const handleUpdate = async (fields: any) => {
-    const hide = message.loading('正在更新');
+  const handleUpdate = async (fields: Partial<API.CompanyRecord>) => {
+    if (!currentRow?.id) {
+      return false;
+    }
+
+    const hide = message.loading('正在更新公司');
     try {
-      await updateCompany(currentRow.id, { ...fields });
+      await updateCompany(currentRow.id, fields);
       hide();
-      message.success('更新成功');
+      message.success('公司已更新');
+      reloadTable();
       return true;
-    } catch (error) {
+    } catch {
       hide();
-      message.error('更新失败请重试！');
+      message.error('更新失败，请重试');
       return false;
     }
   };
 
-  const handleRemove = async (id: string) => {
-    const hide = message.loading('正在删除');
+  const handleRemove = async (id: number) => {
+    const hide = message.loading('正在删除公司');
     try {
       await deleteCompany(id);
       hide();
-      message.success('删除成功');
-      if (actionRef.current) {
-        actionRef.current.reload();
-      }
-      return true;
-    } catch (error) {
+      message.success('公司已删除');
+      reloadTable();
+    } catch {
       hide();
       message.error('删除失败，请重试');
-      return false;
     }
   };
 
-  const columns: ProColumns<any>[] = [
+  const columns: ProColumns<API.CompanyRecord>[] = [
     {
-      title: '公司全称',
-      dataIndex: 'fullName',
+      title: '公司名称',
+      dataIndex: 'name',
       formItemProps: {
-        rules: [{ required: true, message: '此项为必填项' }],
+        rules: [{ required: true, message: '请输入公司名称' }],
       },
     },
     {
@@ -87,21 +100,20 @@ const CompanyList: React.FC = () => {
       },
     },
     {
-      title: '联系人',
+      title: '法人',
       dataIndex: 'legalPerson',
-      hideInSearch: true,
+      search: false,
     },
     {
       title: '联系电话',
       dataIndex: 'contactPhone',
-      hideInSearch: true,
+      search: false,
     },
     {
       title: '状态',
       dataIndex: 'status',
-      hideInForm: true,
       valueEnum: {
-        ACTIVE: { text: '正常', status: 'Success' },
+        ACTIVE: { text: '启用', status: 'Success' },
         INACTIVE: { text: '停用', status: 'Error' },
       },
     },
@@ -114,14 +126,14 @@ const CompanyList: React.FC = () => {
           key="edit"
           onClick={() => {
             setCurrentRow(record);
-            handleUpdateModalVisible(true);
+            setUpdateModalOpen(true);
           }}
         >
           编辑
         </a>,
         <Popconfirm
           key="delete"
-          title="确定删除吗？"
+          title="确认删除这家公司吗？"
           onConfirm={() => handleRemove(record.id)}
         >
           <a style={{ color: 'red' }}>删除</a>
@@ -132,58 +144,43 @@ const CompanyList: React.FC = () => {
 
   return (
     <PageContainer>
-      <ProTable<any, API.PageParams>
+      <ProTable<API.CompanyRecord, API.PageParams>
         headerTitle="公司列表"
         actionRef={actionRef}
         rowKey="id"
-        search={{
-          labelWidth: 120,
-        }}
+        search={{ labelWidth: 120 }}
         toolBarRender={() => [
-          <Button
-            type="primary"
-            key="primary"
-            onClick={() => {
-              handleModalVisible(true);
-            }}
-          >
-            <PlusOutlined /> 新建
+          <Button key="create" type="primary" onClick={() => setCreateModalOpen(true)}>
+            <PlusOutlined /> 新建公司
           </Button>,
         ]}
         request={async (params) => {
           const res = await queryCompanyList(params);
           return {
-            data: res.data?.records || [],
-            success: true,
-            total: res.data?.total || 0,
+            data: res.data?.records ?? [],
+            success: res.code === 200,
+            total: res.data?.total ?? 0,
           };
         }}
         columns={columns}
       />
 
-      {/* 新建表单 */}
-      <ModalForm
+      <ModalForm<Partial<API.CompanyRecord>>
         title="新建公司"
-        width="600px"
-        visible={createModalVisible}
-        onVisibleChange={handleModalVisible}
-        onFinish={async (value) => {
-          const success = await handleAdd(value);
+        width={600}
+        open={createModalOpen}
+        onOpenChange={setCreateModalOpen}
+        onFinish={async (values) => {
+          const success = await handleAdd(values);
           if (success) {
-            handleModalVisible(false);
-            if (actionRef.current) {
-              actionRef.current.reload();
-            }
+            setCreateModalOpen(false);
           }
+          return success;
         }}
       >
-        <ProFormText
-          name="fullName"
-          label="公司全称"
-          rules={[{ required: true }]}
-        />
+        <ProFormText name="name" label="公司名称" rules={[{ required: true }]} />
         <ProFormText name="shortName" label="简称" />
-        <ProFormText name="taxId" label="社会信用代码 (税号)" />
+        <ProFormText name="taxId" label="税号" />
         <ProFormSelect
           name="taxpayerType"
           label="纳税人类型"
@@ -192,50 +189,46 @@ const CompanyList: React.FC = () => {
             SMALL_SCALE: '小规模纳税人',
           }}
         />
-        <ProFormText name="legalPerson" label="法定代表人" />
+        <ProFormText name="legalPerson" label="法人" />
         <ProFormText name="contactPhone" label="联系电话" />
-        <ProFormTextArea name="address" label="注册地址" />
+        <ProFormTextArea name="address" label="地址" />
       </ModalForm>
 
-      {/* 更新表单 */}
-      {currentRow && Object.keys(currentRow).length ? (
-        <ModalForm
-          title="编辑公司"
-          width="600px"
-          visible={updateModalVisible}
-          onVisibleChange={handleUpdateModalVisible}
-          initialValues={currentRow}
-          onFinish={async (value) => {
-            const success = await handleUpdate(value);
-            if (success) {
-              handleUpdateModalVisible(false);
-              setCurrentRow(undefined);
-              if (actionRef.current) {
-                actionRef.current.reload();
-              }
-            }
+      <ModalForm<Partial<API.CompanyRecord>>
+        title="编辑公司"
+        width={600}
+        open={updateModalOpen}
+        onOpenChange={(open) => {
+          setUpdateModalOpen(open);
+          if (!open) {
+            setCurrentRow(undefined);
+          }
+        }}
+        initialValues={currentRow}
+        onFinish={async (values) => {
+          const success = await handleUpdate(values);
+          if (success) {
+            setUpdateModalOpen(false);
+            setCurrentRow(undefined);
+          }
+          return success;
+        }}
+      >
+        <ProFormText name="name" label="公司名称" rules={[{ required: true }]} />
+        <ProFormText name="shortName" label="简称" />
+        <ProFormText name="taxId" label="税号" />
+        <ProFormSelect
+          name="taxpayerType"
+          label="纳税人类型"
+          valueEnum={{
+            GENERAL: '一般纳税人',
+            SMALL_SCALE: '小规模纳税人',
           }}
-        >
-          <ProFormText
-            name="fullName"
-            label="公司全称"
-            rules={[{ required: true }]}
-          />
-          <ProFormText name="shortName" label="简称" />
-          <ProFormText name="taxId" label="社会信用代码 (税号)" />
-          <ProFormSelect
-            name="taxpayerType"
-            label="纳税人类型"
-            valueEnum={{
-              GENERAL: '一般纳税人',
-              SMALL_SCALE: '小规模纳税人',
-            }}
-          />
-          <ProFormText name="legalPerson" label="法定代表人" />
-          <ProFormText name="contactPhone" label="联系电话" />
-          <ProFormTextArea name="address" label="注册地址" />
-        </ModalForm>
-      ) : null}
+        />
+        <ProFormText name="legalPerson" label="法人" />
+        <ProFormText name="contactPhone" label="联系电话" />
+        <ProFormTextArea name="address" label="地址" />
+      </ModalForm>
     </PageContainer>
   );
 };

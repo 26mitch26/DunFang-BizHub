@@ -1,34 +1,49 @@
 import { PlusOutlined } from '@ant-design/icons';
+import {
+  ModalForm,
+  PageContainer,
+  ProFormDigit,
+  ProFormMoney,
+  ProTable,
+} from '@ant-design/pro-components';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
-import { PageContainer, ProTable } from '@ant-design/pro-components';
-import { Button, message, Tag } from 'antd';
+import { Button, Tag, message } from 'antd';
 import React, { useRef, useState } from 'react';
-import { queryInventoryList, inboundInventory } from '@/services/dunfang/inventory';
-import { ModalForm, ProFormText, ProFormDigit, ProFormMoney } from '@ant-design/pro-components';
+
+import { inboundInventory, queryInventoryList } from '@/services/dunfang/inventory';
+
+type InboundFormValue = {
+  warehouseId: number;
+  locationId: number;
+  productId: number;
+  quantity: number;
+  unitCost: number;
+};
 
 const InventoryList: React.FC = () => {
-  const actionRef = useRef<ActionType>();
-  const [inboundModalVisible, handleInboundModalVisible] = useState<boolean>(false);
+  const actionRef = useRef<ActionType | null>(null);
+  const [inboundModalOpen, setInboundModalOpen] = useState(false);
 
-  const handleInbound = async (fields: any) => {
+  const handleInbound = async (fields: InboundFormValue) => {
     const hide = message.loading('正在入库');
     try {
-      await inboundInventory({ ...fields });
+      await inboundInventory(fields);
       hide();
       message.success('入库成功');
+      actionRef.current?.reload();
       return true;
-    } catch (error) {
+    } catch {
       hide();
-      message.error('入库失败请重试！');
+      message.error('入库失败，请重试');
       return false;
     }
   };
 
-  const columns: ProColumns<any>[] = [
+  const columns: ProColumns<API.InventoryBatchRecord>[] = [
     {
       title: '批次号',
       dataIndex: 'batchNo',
-      hideInSearch: true,
+      search: false,
     },
     {
       title: '商品 ID',
@@ -41,89 +56,88 @@ const InventoryList: React.FC = () => {
     {
       title: '库位 ID',
       dataIndex: 'locationId',
-      hideInSearch: true,
+      search: false,
     },
     {
       title: '入库日期',
       dataIndex: 'inboundDate',
       valueType: 'date',
-      hideInSearch: true,
+      search: false,
     },
     {
       title: '单位成本',
       dataIndex: 'unitCost',
       valueType: 'money',
-      hideInSearch: true,
+      search: false,
     },
     {
       title: '当前数量',
       dataIndex: 'quantity',
-      hideInSearch: true,
-      render: (_, record) => <Tag color="blue">{record.quantity}</Tag>,
+      search: false,
+      render: (_, record) => <Tag color="blue">{record.quantity ?? 0}</Tag>,
     },
     {
       title: '锁定数量',
       dataIndex: 'lockedQuantity',
-      hideInSearch: true,
-      render: (_, record) => <Tag color="red">{record.lockedQuantity}</Tag>,
+      search: false,
+      render: (_, record) => <Tag color="red">{record.lockedQuantity ?? 0}</Tag>,
     },
     {
       title: '可用数量',
-      hideInSearch: true,
-      render: (_, record) => <Tag color="green">{record.quantity - record.lockedQuantity}</Tag>,
+      search: false,
+      render: (_, record) => (
+        <Tag color="green">
+          {(record.quantity ?? 0) - (record.lockedQuantity ?? 0)}
+        </Tag>
+      ),
     },
   ];
 
   return (
     <PageContainer>
-      <ProTable<any, API.PageParams>
-        headerTitle="批次库存台账 (FIFO)"
+      <ProTable<API.InventoryBatchRecord, API.PageParams>
+        headerTitle="实时库存"
         actionRef={actionRef}
         rowKey="id"
-        search={{
-          labelWidth: 120,
-        }}
+        search={{ labelWidth: 120 }}
         toolBarRender={() => [
-          <Button
-            type="primary"
-            key="primary"
-            onClick={() => {
-              handleInboundModalVisible(true);
-            }}
-          >
+          <Button key="inbound" type="primary" onClick={() => setInboundModalOpen(true)}>
             <PlusOutlined /> 手动入库
           </Button>,
         ]}
         request={async (params) => {
           const res = await queryInventoryList(params);
           return {
-            data: res.data?.records || [],
-            success: true,
-            total: res.data?.total || 0,
+            data: res.data?.records ?? [],
+            success: res.code === 200,
+            total: res.data?.total ?? 0,
           };
         }}
         columns={columns}
       />
 
-      <ModalForm
-        title="手动入库 (生成新批次)"
-        width="500px"
-        visible={inboundModalVisible}
-        onVisibleChange={handleInboundModalVisible}
-        onFinish={async (value) => {
-          const success = await handleInbound(value);
+      <ModalForm<InboundFormValue>
+        title="手动入库"
+        width={520}
+        open={inboundModalOpen}
+        onOpenChange={setInboundModalOpen}
+        onFinish={async (values) => {
+          const success = await handleInbound(values);
           if (success) {
-            handleInboundModalVisible(false);
-            if (actionRef.current) {
-              actionRef.current.reload();
-            }
+            setInboundModalOpen(false);
           }
+          return success;
         }}
       >
-        <ProFormText name="warehouseId" label="仓库 ID" rules={[{ required: true }]} />
-        <ProFormText name="locationId" label="库位 ID" />
-        <ProFormText name="productId" label="商品 ID" rules={[{ required: true }]} />
-        <ProFormDigit name="quantity" label="入库数量" rules={[{ required: true }]} min={1} />
+        <ProFormDigit name="warehouseId" label="仓库 ID" rules={[{ required: true }]} />
+        <ProFormDigit name="locationId" label="库位 ID" rules={[{ required: true }]} />
+        <ProFormDigit name="productId" label="商品 ID" rules={[{ required: true }]} />
+        <ProFormDigit
+          name="quantity"
+          label="入库数量"
+          min={1}
+          rules={[{ required: true }]}
+        />
         <ProFormMoney name="unitCost" label="单位成本" rules={[{ required: true }]} />
       </ModalForm>
     </PageContainer>

@@ -4,22 +4,20 @@ import {
   PhoneOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import {
-  ProFormText,
-} from '@ant-design/pro-components';
-import {
-  Helmet,
-  history,
-  useModel,
-} from '@umijs/max';
+import { ProFormText } from '@ant-design/pro-components';
+import { Helmet, history, useModel } from '@umijs/max';
 import { Alert, App, Button, Card, Form, Typography } from 'antd';
 import { createStyles } from 'antd-style';
 import React, { useState } from 'react';
 import { flushSync } from 'react-dom';
-import { register } from '@/services/dunfang/auth';
+
+import {
+  persistAuthSession,
+  register,
+} from '@/services/dunfang/auth';
 import Settings from '../../../../config/defaultSettings';
 
-const { Title, Text, Link } = Typography;
+const { Link, Text, Title } = Typography;
 
 const useStyles = createStyles(({ token }) => {
   return {
@@ -47,21 +45,28 @@ const useStyles = createStyles(({ token }) => {
 });
 
 const Register: React.FC = () => {
-  const [errorMsg, setErrorMsg] = useState<string>('');
+  const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
   const { setInitialState } = useModel('@@initialState');
   const { styles } = useStyles();
   const { message } = App.useApp();
   const [form] = Form.useForm();
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: {
+    email: string;
+    nickname?: string;
+    phone?: string;
+    password: string;
+    confirmPassword: string;
+  }) => {
     if (values.password !== values.confirmPassword) {
-      setErrorMsg('两次输入的密码不一致！');
+      setErrorMsg('两次输入的密码不一致');
       return;
     }
 
     setLoading(true);
     setErrorMsg('');
+
     try {
       const response = await register({
         email: values.email,
@@ -71,27 +76,12 @@ const Register: React.FC = () => {
       });
 
       if (response.code === 200 && response.data) {
-        const { data } = response;
-
-        // Save tokens
-        localStorage.setItem('dunfang_access_token', data.accessToken);
-        localStorage.setItem('dunfang_refresh_token', data.refreshToken);
-
-        // Save user info
-        const userInfo: API.CurrentUser = {
-          userId: data.userId,
-          email: data.email,
-          nickname: data.nickname,
-          roles: data.roles,
-          access: data.roles.includes('ADMIN') ? 'admin' : 'user',
-        };
-        localStorage.setItem('dunfang_user', JSON.stringify(userInfo));
-
-        message.success('注册成功！');
+        const userInfo = persistAuthSession(response.data);
+        message.success('注册成功');
 
         flushSync(() => {
-          setInitialState((s) => ({
-            ...s,
+          setInitialState((state) => ({
+            ...state,
             currentUser: userInfo,
           }));
         });
@@ -102,8 +92,9 @@ const Register: React.FC = () => {
 
       setErrorMsg(response.message || '注册失败');
     } catch (error: any) {
-      const msg = error?.data?.message || error?.message || '注册失败，请重试！';
-      setErrorMsg(msg);
+      const nextMessage =
+        error?.data?.message || error?.message || '注册失败，请重试';
+      setErrorMsg(nextMessage);
     } finally {
       setLoading(false);
     }
@@ -124,7 +115,7 @@ const Register: React.FC = () => {
           <Title level={3} style={{ marginBottom: 4 }}>
             DunFang BizHub
           </Title>
-          <Text type="secondary">创建您的账户</Text>
+          <Text type="secondary">创建你的账号</Text>
         </div>
 
         {errorMsg && (
@@ -144,8 +135,8 @@ const Register: React.FC = () => {
             fieldProps={{ prefix: <MailOutlined /> }}
             placeholder="邮箱地址"
             rules={[
-              { required: true, message: '请输入邮箱！' },
-              { type: 'email', message: '邮箱格式不正确！' },
+              { required: true, message: '请输入邮箱地址' },
+              { type: 'email', message: '邮箱格式不正确' },
             ]}
           />
           <ProFormText
@@ -160,42 +151,34 @@ const Register: React.FC = () => {
             rules={[
               {
                 pattern: /^1\d{10}$/,
-                message: '手机号格式不正确！',
+                message: '手机号格式不正确',
               },
             ]}
           />
           <ProFormText.Password
             name="password"
             fieldProps={{ prefix: <LockOutlined /> }}
-            placeholder="密码（至少6位）"
+            placeholder="密码（至少 6 位）"
             rules={[
-              { required: true, message: '请输入密码！' },
-              { min: 6, message: '密码至少6位！' },
+              { required: true, message: '请输入密码' },
+              { min: 6, message: '密码至少 6 位' },
             ]}
           />
           <ProFormText.Password
             name="confirmPassword"
             fieldProps={{ prefix: <LockOutlined /> }}
             placeholder="确认密码"
-            rules={[
-              { required: true, message: '请确认密码！' },
-            ]}
+            rules={[{ required: true, message: '请确认密码' }]}
           />
 
           <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              block
-              size="large"
-            >
+            <Button type="primary" htmlType="submit" loading={loading} block size="large">
               注册
             </Button>
           </Form.Item>
 
           <div style={{ textAlign: 'center' }}>
-            <Text type="secondary">已有账户？</Text>
+            <Text type="secondary">已有账号？</Text>
             <Link onClick={() => history.push('/user/login')}>立即登录</Link>
           </div>
         </Form>

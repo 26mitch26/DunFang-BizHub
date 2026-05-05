@@ -3,10 +3,13 @@
 
 declare namespace API {
   type CurrentUser = {
-    name?: string;
-    avatar?: string;
+    userId?: number;
     userid?: string;
+    name?: string;
+    nickname?: string;
+    avatar?: string;
     email?: string;
+    roles?: string[];
     signature?: string;
     title?: string;
     group?: string;
@@ -32,6 +35,7 @@ declare namespace API {
   type PageParams = {
     current?: number;
     pageSize?: number;
+    size?: number;
   };
 
   type RuleListItem = {
@@ -51,7 +55,6 @@ declare namespace API {
 
   type RuleList = {
     data?: RuleListItem[];
-    /** 列表的内容总数 */
     total?: number;
     success?: boolean;
   };
@@ -62,6 +65,7 @@ declare namespace API {
   };
 
   type LoginParams = {
+    email?: string;
     username?: string;
     password?: string;
     autoLogin?: boolean;
@@ -69,17 +73,13 @@ declare namespace API {
   };
 
   type ErrorResponse = {
-    /** 业务约定的错误码 */
     errorCode: string;
-    /** 业务上的错误信息 */
     errorMessage?: string;
-    /** 业务上的请求是否成功 */
     success?: boolean;
   };
 
   type NoticeIconList = {
     data?: NoticeIconItem[];
-    /** 列表的内容总数 */
     total?: number;
     success?: boolean;
   };
