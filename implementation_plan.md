@@ -1,186 +1,51 @@
-# Phase 2: CRM + 节日送礼 + 仓储 + 物流
+# Phase 2.5: 核心业务 UI 完整实现
 
-## 目标与背景
+## 决策背景
 
-在 Phase 1 我们完成了后端基础骨架、权限认证、公司/品牌/客户基础 CRUD、销售订单与佣金引擎的核心实现。Phase 2 我们将深入业务场景，构建客户关系管理 (CRM)、节日维系 (Gifting) 以及后端的供应链支撑 (Warehouse & Logistics)。
+您让我决定是先进入 Phase 3（AI 模块）还是先实现已有模块的 UI。
 
-> [!NOTE]
-> Phase 2 的主要难点在于**库存台账 (Inventory Ledger)** 的并发更新设计，以及如何与已有的 `sales_order` 无缝衔接。
+**我决定：先完整实现 Phase 1 和 Phase 2 的核心业务 UI。**
 
-## 需求分解
-
-### 1. CRM 客户开发扩展
-在原有的 Customer 实体上进行扩展，增加客户画像标签和跟进记录。
-
-**核心功能**:
-- 客户状态流转 (意向/潜在/成交/流失预警)
-- 拜访/跟进记录 (Follow-up log)
-- 客户标签化体系 (Tags)
-
-### 2. 节日送礼系统
-针对家族生意重感情维系的特点，建立系统化的节日提醒和送礼预算机制。
-
-**核心功能**:
-- 节日日历管理 (法定节假日 + 自定义客户生日/纪念日)
-- 客户等级与预算配置体系 (等级A：预算1000等)
-- 送礼记录追踪与节前自动提醒任务
-
-### 3. 仓储管理 (Warehouse)
-支撑实体货物的存放与流转。
-
-**核心功能**:
-- 多仓库管理与库位管理 (Warehouse & Bin/Location)
-- 基础库存台账 (Inventory ledger)，支持并发安全的库存扣减
-
-### 4. 物流与出入库 (Logistics)
-实现销售订单发货与采购入库的落地。
-
-**核心功能**:
-- 出库单/入库单管理 (Inbound/Outbound Order)
-- 送货调度任务 (Delivery Task)
+**理由如下**：
+1. **端到端验证**：目前后端逻辑非常庞大（包含多公司、产品、订单、佣金、FIFO 库存），如果不通过 UI 跑通闭环，潜藏的 BUG 难以发现。
+2. **AI 落地依赖**：Phase 3 的 AI 发票与智能对账需要依赖实际的“公司信息”、“产品台账”和“销售订单数据”作为知识库。没有前台录入数据的入口，AI 只是无源之水。
+3. **分阶段交付**：完成 UI 后，我们就获得了一个**真正可演示、可交付的 ERP 系统基础版**，极大地增强项目的稳健性。
 
 ---
 
-## 数据库架构更新方案
+## UI 实现规划 (前端 Ant Design Pro)
+
+考虑到工作量，我们将 UI 开发聚焦在最核心的**数据流转主线**：
+`创建公司 -> 录入商品 -> 下达销售订单 -> 出库扣减库存`
+
+### 1. 基础数据管理 (Base Data)
+- **多公司管理 (`/admin/company`)**：实现 ProTable，支持用户的增删改查。
+- **商品/SKU 管理 (`/wms/product`)**：实现商品的录入与基本信息维护。
+
+### 2. 仓储与库存 (Warehouse & Inventory)
+- **仓库配置 (`/wms/warehouse`)**：建立仓库。
+- **入库单操作 (`/wms/inbound`)**：手动触发入库，生成带有 `inboundDate` 和成本的批次。
+- **批次库存台账 (`/wms/inventory`)**：展示每个商品在不同仓库的 FIFO 批次库存、可用量和锁定数量。
+
+### 3. 核心销售流 (Sales Workflow)
+- **销售订单录入 (`/sales/order`)**：支持选择公司、客户和多个商品（多行明细）。
+- **订单确认流转**：
+  - 点击 [确认订单] -> 触发后端佣金计算与库存预先锁定。
+  - 点击 [发货] -> 生成出库单，触发 FIFO 实际扣减库存。
+
+### 4. 数据看板 (Dashboard)
+- **Dashboard (`/dashboard/analysis`)**：接入真实的统计数据（如：总库存金额、本月销售额、各销售员佣金排行）。
+
+---
+
+## 执行步骤
+
+1. **API 对接层**：在前端 `src/services` 中使用 UmiJS 规范编写所有对应的请求函数。
+2. **ProTable 搭建**：利用 Ant Design Pro 的高阶组件快速搭建 CRUD 列表页。
+3. **表单开发**：开发复杂的销售订单主子表单（主单信息 + 多条明细记录）。
+4. **前后端联调**：在本地跑通完整的 `录入商品 -> 入库 -> 下单 -> 扣减库存 -> 计算佣金` 链路。
 
 > [!IMPORTANT]
-> 所有的表都需要继承我们定义的 `BaseEntity`，拥有 `id`, `created_at`, `updated_at`, `created_by`, `updated_by`, `deleted` 字段。
+> 此阶段任务量较饱满，但我会利用 Ant Design Pro 的特性高效推进。完成后，我们将拥有一个功能完备的基础 ERP，之后再在此基础上挂载 Phase 3 的 AI 引擎将事半功倍。
 
-### [NEW] CRM 相关表
-
-```sql
--- 客户跟进记录
-CREATE TABLE crm_follow_up (
-    id BIGINT PRIMARY KEY,
-    customer_id BIGINT NOT NULL,
-    contact_person VARCHAR(50),      -- 跟进人
-    follow_type ENUM('VISIT', 'CALL', 'MESSAGE', 'OTHER'),
-    content TEXT,                    -- 跟进内容
-    next_follow_date DATETIME,       -- 下次跟进提醒时间
-    -- BaseEntity fields...
-);
-
--- 客户标签关联表
-CREATE TABLE crm_customer_tag (
-    id BIGINT PRIMARY KEY,
-    customer_id BIGINT NOT NULL,
-    tag_name VARCHAR(50) NOT NULL,
-    -- BaseEntity fields...
-);
-```
-
-### [NEW] 节日送礼相关表
-
-```sql
--- 节日/纪念日日历
-CREATE TABLE gift_festival (
-    id BIGINT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    festival_date DATE,              -- 具体日期（如果是公历每年固定）
-    is_lunar BOOLEAN DEFAULT FALSE,  -- 是否农历
-    description VARCHAR(200),
-    -- BaseEntity fields...
-);
-
--- 送礼预算规则
-CREATE TABLE gift_budget_rule (
-    id BIGINT PRIMARY KEY,
-    customer_level ENUM('A', 'B', 'C', 'D'),
-    festival_id BIGINT,              -- 针对特定节日（可为空，表示通用）
-    budget_limit DECIMAL(10, 2),
-    -- BaseEntity fields...
-);
-
--- 送礼记录
-CREATE TABLE gift_record (
-    id BIGINT PRIMARY KEY,
-    customer_id BIGINT NOT NULL,
-    festival_id BIGINT,
-    gift_name VARCHAR(100),
-    cost DECIMAL(10, 2),
-    status ENUM('PLANNED', 'SENT', 'DELIVERED'),
-    -- BaseEntity fields...
-);
-```
-
-### [NEW] 仓储与物流相关表
-
-```sql
--- 基础物料 (Product/SKU)
-CREATE TABLE wms_product (
-    id BIGINT PRIMARY KEY,
-    sku_code VARCHAR(50) UNIQUE NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    category_id BIGINT,
-    brand_id BIGINT,
-    unit VARCHAR(20),
-    specifications VARCHAR(200),
-    -- BaseEntity fields...
-);
-
--- 仓库 (Warehouse)
-CREATE TABLE wms_warehouse (
-    id BIGINT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    address VARCHAR(200),
-    manager_id BIGINT,
-    -- BaseEntity fields...
-);
-
--- 库位 (Location)
-CREATE TABLE wms_location (
-    id BIGINT PRIMARY KEY,
-    warehouse_id BIGINT NOT NULL,
-    code VARCHAR(50) NOT NULL,       -- 库位编码 A-01-01
-    -- BaseEntity fields...
-);
-
--- 批次库存台账 (Inventory Batch for FIFO)
-CREATE TABLE wms_inventory_batch (
-    id BIGINT PRIMARY KEY,
-    warehouse_id BIGINT NOT NULL,
-    location_id BIGINT,
-    product_id BIGINT NOT NULL,
-    batch_no VARCHAR(50) NOT NULL,   -- 批次号 (入库单号+日期)
-    inbound_date DATE NOT NULL,      -- 入库日期（用于先进先出）
-    unit_cost DECIMAL(12, 2) NOT NULL, -- 入库成本单价
-    quantity INT NOT NULL DEFAULT 0,  -- 当前可用数量
-    locked_quantity INT NOT NULL DEFAULT 0, -- 销售预扣减锁定
-    -- BaseEntity fields...
-    INDEX idx_fifo (product_id, inbound_date)
-);
-
--- 总体库存视图 (View or Summary Table)
--- 为了查询方便，后端可以聚合 wms_inventory_batch 输出总库存。
-
--- 出入库/送货单 (Delivery Task)
-CREATE TABLE wms_delivery_task (
-    id BIGINT PRIMARY KEY,
-    type ENUM('INBOUND', 'OUTBOUND'),
-    related_order_id BIGINT,         -- 关联的采购/销售订单
-    status ENUM('PENDING', 'SHIPPING', 'COMPLETED'),
-    driver_name VARCHAR(50),
-    driver_phone VARCHAR(20),
-    -- BaseEntity fields...
-);
-```
-
-### [NEW] 日历与节日工具支持
-由于业务强依赖农历纪念日（中秋、端午、客户农历生日），系统将集成 `cn.hutool` 中的日历模块或专用的 `lunar-java` 工具包，以保证在无外网环境和高并发下的稳定性（优于免费外部 API）。
-
----
-
-## 验证计划 (Verification Plan)
-
-### 后端 (Backend)
-1. 编写完整的 Flyway V2 迁移脚本。
-2. 添加 `lunar-java` 依赖。
-3. 编写核心功能逻辑：FIFO 出库扣减逻辑验证（按 `inbound_date` 排序逐批次扣减）。
-
-### 前端 (Frontend)
-1. 新增 CRM 页面 (`/crm/follow-up`, `/crm/gifting`)。
-2. 新增 WMS 页面 (`/wms/product`, `/wms/warehouse`, `/wms/inventory`)。
-
-## 执行状态
-- 用户已确认引入正式 Product 表、FIFO 批次计价及本地 Lunar 工具。
-- 即刻进入开发阶段。
+请您批准此计划，我将立即开始全速执行 UI 开发！

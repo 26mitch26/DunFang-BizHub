@@ -4,14 +4,14 @@ import { PageContainer, ProTable } from '@ant-design/pro-components';
 import { Button, message, Popconfirm } from 'antd';
 import React, { useRef, useState } from 'react';
 import {
-  queryProductList,
-  addProduct,
-  updateProduct,
-  deleteProduct,
-} from '@/services/dunfang/product';
-import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-components';
+  queryCompanyList,
+  addCompany,
+  updateCompany,
+  deleteCompany,
+} from '@/services/dunfang/company';
+import { ModalForm, ProFormText, ProFormSelect, ProFormTextArea } from '@ant-design/pro-components';
 
-const ProductList: React.FC = () => {
+const CompanyList: React.FC = () => {
   const actionRef = useRef<ActionType>();
   const [createModalVisible, handleModalVisible] = useState<boolean>(false);
   const [updateModalVisible, handleUpdateModalVisible] = useState<boolean>(false);
@@ -20,7 +20,7 @@ const ProductList: React.FC = () => {
   const handleAdd = async (fields: any) => {
     const hide = message.loading('正在添加');
     try {
-      await addProduct({ ...fields });
+      await addCompany({ ...fields });
       hide();
       message.success('添加成功');
       return true;
@@ -34,7 +34,7 @@ const ProductList: React.FC = () => {
   const handleUpdate = async (fields: any) => {
     const hide = message.loading('正在更新');
     try {
-      await updateProduct(currentRow.id, { ...fields });
+      await updateCompany(currentRow.id, { ...fields });
       hide();
       message.success('更新成功');
       return true;
@@ -48,7 +48,7 @@ const ProductList: React.FC = () => {
   const handleRemove = async (id: string) => {
     const hide = message.loading('正在删除');
     try {
-      await deleteProduct(id);
+      await deleteCompany(id);
       hide();
       message.success('删除成功');
       if (actionRef.current) {
@@ -64,34 +64,46 @@ const ProductList: React.FC = () => {
 
   const columns: ProColumns<any>[] = [
     {
-      title: 'SKU 编码',
-      dataIndex: 'skuCode',
+      title: '公司全称',
+      dataIndex: 'fullName',
       formItemProps: {
         rules: [{ required: true, message: '此项为必填项' }],
       },
     },
     {
-      title: '商品名称',
-      dataIndex: 'name',
-      formItemProps: {
-        rules: [{ required: true, message: '此项为必填项' }],
+      title: '简称',
+      dataIndex: 'shortName',
+    },
+    {
+      title: '税号',
+      dataIndex: 'taxId',
+    },
+    {
+      title: '纳税人类型',
+      dataIndex: 'taxpayerType',
+      valueEnum: {
+        GENERAL: { text: '一般纳税人', status: 'Success' },
+        SMALL_SCALE: { text: '小规模纳税人', status: 'Default' },
       },
     },
     {
-      title: '规格型号',
-      dataIndex: 'specifications',
+      title: '联系人',
+      dataIndex: 'legalPerson',
       hideInSearch: true,
     },
     {
-      title: '计量单位',
-      dataIndex: 'unit',
+      title: '联系电话',
+      dataIndex: 'contactPhone',
       hideInSearch: true,
     },
     {
-      title: '备注',
-      dataIndex: 'remark',
-      valueType: 'textarea',
-      hideInSearch: true,
+      title: '状态',
+      dataIndex: 'status',
+      hideInForm: true,
+      valueEnum: {
+        ACTIVE: { text: '正常', status: 'Success' },
+        INACTIVE: { text: '停用', status: 'Error' },
+      },
     },
     {
       title: '操作',
@@ -121,7 +133,7 @@ const ProductList: React.FC = () => {
   return (
     <PageContainer>
       <ProTable<any, API.PageParams>
-        headerTitle="商品/SKU 列表"
+        headerTitle="公司列表"
         actionRef={actionRef}
         rowKey="id"
         search={{
@@ -135,11 +147,11 @@ const ProductList: React.FC = () => {
               handleModalVisible(true);
             }}
           >
-            <PlusOutlined /> 新建商品
+            <PlusOutlined /> 新建
           </Button>,
         ]}
         request={async (params) => {
-          const res = await queryProductList(params);
+          const res = await queryCompanyList(params);
           return {
             data: res.data?.records || [],
             success: true,
@@ -149,9 +161,10 @@ const ProductList: React.FC = () => {
         columns={columns}
       />
 
+      {/* 新建表单 */}
       <ModalForm
-        title="新建商品"
-        width="500px"
+        title="新建公司"
+        width="600px"
         visible={createModalVisible}
         onVisibleChange={handleModalVisible}
         onFinish={async (value) => {
@@ -164,17 +177,31 @@ const ProductList: React.FC = () => {
           }
         }}
       >
-        <ProFormText name="skuCode" label="SKU 编码" rules={[{ required: true }]} />
-        <ProFormText name="name" label="商品名称" rules={[{ required: true }]} />
-        <ProFormText name="specifications" label="规格型号" />
-        <ProFormText name="unit" label="计量单位 (如: 个, 台, 件)" />
-        <ProFormTextArea name="remark" label="备注" />
+        <ProFormText
+          name="fullName"
+          label="公司全称"
+          rules={[{ required: true }]}
+        />
+        <ProFormText name="shortName" label="简称" />
+        <ProFormText name="taxId" label="社会信用代码 (税号)" />
+        <ProFormSelect
+          name="taxpayerType"
+          label="纳税人类型"
+          valueEnum={{
+            GENERAL: '一般纳税人',
+            SMALL_SCALE: '小规模纳税人',
+          }}
+        />
+        <ProFormText name="legalPerson" label="法定代表人" />
+        <ProFormText name="contactPhone" label="联系电话" />
+        <ProFormTextArea name="address" label="注册地址" />
       </ModalForm>
 
+      {/* 更新表单 */}
       {currentRow && Object.keys(currentRow).length ? (
         <ModalForm
-          title="编辑商品"
-          width="500px"
+          title="编辑公司"
+          width="600px"
           visible={updateModalVisible}
           onVisibleChange={handleUpdateModalVisible}
           initialValues={currentRow}
@@ -189,15 +216,28 @@ const ProductList: React.FC = () => {
             }
           }}
         >
-          <ProFormText name="skuCode" label="SKU 编码" rules={[{ required: true }]} />
-          <ProFormText name="name" label="商品名称" rules={[{ required: true }]} />
-          <ProFormText name="specifications" label="规格型号" />
-          <ProFormText name="unit" label="计量单位" />
-          <ProFormTextArea name="remark" label="备注" />
+          <ProFormText
+            name="fullName"
+            label="公司全称"
+            rules={[{ required: true }]}
+          />
+          <ProFormText name="shortName" label="简称" />
+          <ProFormText name="taxId" label="社会信用代码 (税号)" />
+          <ProFormSelect
+            name="taxpayerType"
+            label="纳税人类型"
+            valueEnum={{
+              GENERAL: '一般纳税人',
+              SMALL_SCALE: '小规模纳税人',
+            }}
+          />
+          <ProFormText name="legalPerson" label="法定代表人" />
+          <ProFormText name="contactPhone" label="联系电话" />
+          <ProFormTextArea name="address" label="注册地址" />
         </ModalForm>
       ) : null}
     </PageContainer>
   );
 };
 
-export default ProductList;
+export default CompanyList;

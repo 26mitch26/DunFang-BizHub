@@ -51,18 +51,18 @@ export default [
   },
   {
     path: '/admin',
-    name: 'admin',
+    name: '系统管理',
     icon: 'crown',
     access: 'canAdmin',
     routes: [
       {
         path: '/admin',
-        redirect: '/admin/sub-page',
+        redirect: '/admin/company',
       },
       {
-        path: '/admin/sub-page',
-        name: 'sub-page',
-        component: './Admin',
+        path: '/admin/company',
+        name: '公司管理',
+        component: './admin/company',
       },
     ],
   },
@@ -92,6 +92,18 @@ export default [
         icon: 'desktop',
         path: '/dashboard/workplace',
         component: './dashboard/workplace',
+      },
+    ],
+  },
+  {
+    path: '/sales',
+    name: '销售管理',
+    icon: 'shopping',
+    routes: [
+      {
+        path: '/sales/order',
+        name: '销售订单',
+        component: './sales/order',
       },
     ],
   },
