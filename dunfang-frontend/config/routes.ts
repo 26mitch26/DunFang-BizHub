@@ -96,6 +96,62 @@ export default [
     ],
   },
   {
+    path: '/crm',
+    name: '客户管理',
+    icon: 'team',
+    routes: [
+      {
+        path: '/crm/follow-up',
+        name: '跟进记录',
+        component: './crm/follow-up',
+      },
+    ],
+  },
+  {
+    path: '/wms',
+    name: '仓储物流',
+    icon: 'shop',
+    routes: [
+      {
+        path: '/wms/product',
+        name: '商品管理',
+        component: './wms/product',
+      },
+      {
+        path: '/wms/warehouse',
+        name: '仓库与库位',
+        component: './wms/warehouse',
+      },
+      {
+        path: '/wms/inventory',
+        name: '批次库存',
+        component: './wms/inventory',
+      },
+      {
+        path: '/wms/delivery',
+        name: '送货调度',
+        component: './wms/delivery',
+      },
+    ],
+  },
+  {
+    path: '/gifting',
+    name: '节日送礼',
+    icon: 'gift',
+    routes: [
+      {
+        path: '/gifting/calendar',
+        name: '节日日历',
+        component: './gifting/calendar',
+      },
+      {
+        path: '/gifting/plan',
+        name: '送礼计划',
+        component: './gifting/plan',
+      },
+    ],
+  },
+  {
     path: '/form',
     icon: 'form',
     name: 'form',
