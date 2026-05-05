@@ -20,19 +20,20 @@ const RegisterResult: React.FC<Record<string, unknown>> = () => {
     </div>
   );
 
-  const email = params?.get('account') || 'AntDesign@example.com';
+  const email = params?.get('account') || 'demo@dunfang-bizhub.com';
   return (
     <Result
       className={styles.registerResult}
       status="success"
       title={
         <div className={styles.title}>
-          <span>你的账户：{email} 注册成功</span>
+          <span>你的账号 {email} 注册成功</span>
         </div>
       }
-      subTitle="激活邮件已发送到你的邮箱中，邮件有效期为24小时。请及时登录邮箱，点击邮件中的链接激活帐户。"
+      subTitle="激活邮件已发送至你的邮箱，有效期为 24 小时。请尽快完成激活。"
       extra={actions}
     />
   );
 };
+
 export default RegisterResult;

@@ -1,14 +1,10 @@
-import {
-  LogoutOutlined,
-  SettingOutlined,
-  SkinOutlined,
-} from '@ant-design/icons';
+import { LogoutOutlined } from '@ant-design/icons';
 import { history, useModel } from '@umijs/max';
 import type { MenuProps } from 'antd';
 import { Spin } from 'antd';
 import React from 'react';
 import { flushSync } from 'react-dom';
-import { outLogin } from '@/services/ant-design-pro/api';
+import { clearAuthSession } from '@/services/dunfang/auth';
 import HeaderDropdown from '../HeaderDropdown';
 
 export type GlobalHeaderRightProps = {
@@ -18,8 +14,10 @@ export type GlobalHeaderRightProps = {
 export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({
   children,
 }) => {
-  const loginOut = async () => {
-    await outLogin();
+  const { initialState, setInitialState } = useModel('@@initialState');
+
+  const loginOut = () => {
+    clearAuthSession();
     const { search, pathname } = window.location;
     const urlParams = new URL(window.location.href).searchParams;
     const searchParams = new URLSearchParams({
@@ -33,22 +31,14 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({
       });
     }
   };
-  const { initialState, setInitialState } = useModel('@@initialState');
 
   const onMenuClick: MenuProps['onClick'] = (event) => {
-    const { key } = event;
-    if (key === 'logout') {
+    if (event.key === 'logout') {
       flushSync(() => {
         setInitialState((s) => ({ ...s, currentUser: undefined }));
       });
       loginOut();
-      return;
     }
-    if (key === 'theme') {
-      setInitialState((s) => ({ ...s, settingDrawerOpen: true }));
-      return;
-    }
-    history.push(`/account/${key}`);
   };
 
   if (!initialState) {
@@ -62,19 +52,6 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({
   }
 
   const menuItems: MenuProps['items'] = [
-    {
-      key: 'settings',
-      icon: <SettingOutlined />,
-      label: '个人设置',
-    },
-    {
-      key: 'theme',
-      icon: <SkinOutlined />,
-      label: '主题设置',
-    },
-    {
-      type: 'divider' as const,
-    },
     {
       key: 'logout',
       icon: <LogoutOutlined />,

@@ -59,7 +59,7 @@ const Login: React.FC = () => {
       setErrorMsg(response.message || '登录失败');
     } catch (error: any) {
       const nextMessage =
-        error?.data?.message || error?.message || '登录失败，请重试';
+        error?.data?.message || error?.message || '登录失败，请稍后重试';
       setErrorMsg(nextMessage);
     }
   };
@@ -74,8 +74,9 @@ const Login: React.FC = () => {
           contentStyle={{ minWidth: 280, maxWidth: '75vw' }}
           logo={<img alt="logo" src={Settings.logo} />}
           title="DunFang BizHub"
-          subTitle="东方 BizHub 智能经营平台"
+          subTitle="面向分销场景的经营协同与发票识别平台"
           initialValues={{ autoLogin: true }}
+          submitter={{ searchConfig: { submitText: '登录' } }}
           onFinish={async (values) => {
             await handleSubmit(values as API.LoginParams);
           }}

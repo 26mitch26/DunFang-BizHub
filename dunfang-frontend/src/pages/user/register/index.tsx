@@ -11,10 +11,7 @@ import { createStyles } from 'antd-style';
 import React, { useState } from 'react';
 import { flushSync } from 'react-dom';
 
-import {
-  persistAuthSession,
-  register,
-} from '@/services/dunfang/auth';
+import { persistAuthSession, register } from '@/services/dunfang/auth';
 import Settings from '../../../../config/defaultSettings';
 
 const { Link, Text, Title } = Typography;
@@ -93,7 +90,7 @@ const Register: React.FC = () => {
       setErrorMsg(response.message || '注册失败');
     } catch (error: any) {
       const nextMessage =
-        error?.data?.message || error?.message || '注册失败，请重试';
+        error?.data?.message || error?.message || '注册失败，请稍后重试';
       setErrorMsg(nextMessage);
     } finally {
       setLoading(false);
@@ -115,7 +112,7 @@ const Register: React.FC = () => {
           <Title level={3} style={{ marginBottom: 4 }}>
             DunFang BizHub
           </Title>
-          <Text type="secondary">创建你的账号</Text>
+          <Text type="secondary">创建你的业务演示账号</Text>
         </div>
 
         {errorMsg && (

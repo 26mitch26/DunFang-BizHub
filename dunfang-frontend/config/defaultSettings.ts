@@ -16,7 +16,7 @@ const Settings: ProLayoutProps & {
   colorWeak: false,
   title: 'DunFang BizHub',
   pwa: true,
-  logo: 'https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg',
+  logo: '/icons/icon-192x192.png',
   iconfontUrl: '',
   token: {},
 };

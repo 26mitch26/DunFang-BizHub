@@ -1,206 +1,106 @@
+import {
+  ApartmentOutlined,
+  BarcodeOutlined,
+  FileSearchOutlined,
+  ShoppingCartOutlined,
+} from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
-import XMarkdown from '@ant-design/x-markdown';
-import '@ant-design/x-markdown/es/XMarkdown/index.css';
-import enUS from '@root/docs/cheatsheet.en-US.md';
-import zhCN from '@root/docs/cheatsheet.zh-CN.md';
-import { getLocale, useIntl, useModel } from '@umijs/max';
-import { Card } from 'antd';
-import hljs from 'highlight.js';
+import { history } from '@umijs/max';
+import { Button, Card, Col, Descriptions, Row, Space, Tag, Typography } from 'antd';
 import React from 'react';
 
-import 'highlight.js/styles/github.css';
-import './Welcome.css';
-import './Welcome-dark.css';
+const { Paragraph, Text, Title } = Typography;
 
-interface InfoCardProps {
-  title: string;
-  index: number;
-  desc: string;
-  href: string;
-}
-
-const InfoCard: React.FC<InfoCardProps> = ({ title, index, desc, href }) => (
-  <a href={href} target="_blank" rel="noopener noreferrer" aria-label={title}>
-    <Card hoverable size="small">
-      <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#1677ff] text-base font-bold text-white">
-          {index}
-        </div>
-        <div className="min-w-0 flex-1">
-          <h4 className="mb-1 mt-0 text-sm font-semibold">{title}</h4>
-          <p className="mb-0 line-clamp-2 text-xs text-gray-500">{desc}</p>
-        </div>
-      </div>
-    </Card>
-  </a>
-);
-
-const mdContent: Record<string, string> = {
-  'zh-CN': zhCN,
-  'en-US': enUS,
-};
-
-// XMarkdown Renderer passes class names via non-standard props
-interface HeadingProps extends React.HTMLAttributes<HTMLHeadingElement> {
-  tag?: string;
-  domNode?: unknown;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  classname?: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  class?: any;
-}
-
-const Heading: React.FC<HeadingProps> = ({
-  tag: Tag = 'h1',
-  children,
-  className,
-  classname,
-  class: htmlClass,
-}) => {
-  // Merge all possible class sources from XMarkdown Renderer
-  const allClasses = [className, classname, htmlClass]
-    .filter(Boolean)
-    .join(' ');
-  // Extract text content from children for id generation
-  const textContent = React.Children.toArray(children)
-    .map((child) => (typeof child === 'string' ? child : ''))
-    .join('');
-  const id = textContent
-    .replace(/[^\w\s一-鿿-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-')
-    .toLowerCase();
-  const mergedClass = `heading-anchor ${allClasses}`.trim();
-  return (
-    // @ts-expect-error dynamic tag
-    <Tag id={id} className={mergedClass}>
-      <a href={`#${id}`} className="anchor-link">
-        #
-      </a>
-      {children}
-    </Tag>
-  );
-};
-
-const mdComponents = {
-  h1: (props: HeadingProps) => <Heading tag="h1" {...props} />,
-  h2: (props: HeadingProps) => <Heading tag="h2" {...props} />,
-  h3: (props: HeadingProps) => <Heading tag="h3" {...props} />,
-  h4: (props: HeadingProps) => <Heading tag="h4" {...props} />,
-};
-
-const mdConfig = {
-  renderer: {
-    code({ text, lang }: { text: string; lang?: string }) {
-      const langString = (lang || '').trim();
-      let highlighted: string;
-      if (langString && hljs.getLanguage(langString)) {
-        highlighted = hljs.highlight(text.replace(/\n$/, ''), {
-          language: langString,
-        }).value;
-      } else {
-        highlighted = hljs.highlightAuto(text.replace(/\n$/, '')).value;
-      }
-      const classAttr = langString
-        ? ` class="hljs language-${langString}"`
-        : ' class="hljs"';
-      return `<pre><code${classAttr}>${highlighted}\n</code></pre>\n`;
-    },
-  },
-};
-
-const infoCards = [
+const modules = [
   {
-    index: 1,
-    href: 'https://umijs.org/docs/introduce/introduce',
-    titleId: 'pages.welcome.infoCard.umi.title',
-    titleDefault: 'Learn umi',
-    descId: 'pages.welcome.infoCard.umi.desc',
-    descDefault:
-      'umi is an extensible enterprise-level frontend framework based on routing, supporting both config-based and convention-based routes.',
+    title: '公司主数据',
+    description: '公司档案维护、租户归属和基础权限入口。',
+    icon: <ApartmentOutlined />,
+    action: () => history.push('/admin/company'),
   },
   {
-    index: 2,
-    href: 'https://ant.design',
-    titleId: 'pages.welcome.infoCard.antd.title',
-    titleDefault: 'Learn Ant Design',
-    descId: 'pages.welcome.infoCard.antd.desc',
-    descDefault:
-      'antd is a React UI component library based on the Ant Design system, mainly for enterprise-level mid-end products.',
+    title: '销售订单',
+    description: '订单创建、确认和明细追踪。',
+    icon: <ShoppingCartOutlined />,
+    action: () => history.push('/sales/order'),
   },
   {
-    index: 3,
-    href: 'https://procomponents.ant.design',
-    titleId: 'pages.welcome.infoCard.procomponents.title',
-    titleDefault: 'Learn Pro Components',
-    descId: 'pages.welcome.infoCard.procomponents.desc',
-    descDefault:
-      'ProComponents provides higher-abstraction template components on top of Ant Design, with one-component-one-page philosophy.',
+    title: '仓储管理',
+    description: '商品档案、仓库和批次库存三条主链路。',
+    icon: <BarcodeOutlined />,
+    action: () => history.push('/wms/product'),
+  },
+  {
+    title: '发票识别',
+    description: 'AI Worker 驱动的发票提取与对账演示。',
+    icon: <FileSearchOutlined />,
+    action: () => history.push('/finance/invoice'),
   },
 ] as const;
 
 const Welcome: React.FC = () => {
-  const intl = useIntl();
-  const locale = getLocale();
-  const normalizedLocale = locale.toLowerCase();
-  const content =
-    mdContent[locale] ??
-    (normalizedLocale.startsWith('zh')
-      ? mdContent['zh-CN']
-      : mdContent['en-US']);
-  const { initialState } = useModel('@@initialState');
-  const isDark = initialState?.settings?.navTheme === 'realDark';
-
   return (
     <PageContainer
-      title={
-        <>
-          {intl.formatMessage(
-            {
-              id: 'pages.welcome.celebrationTitle',
-              defaultMessage: '欢迎使用 Ant Design Pro {v6}',
-            },
-            {
-              v6: (
-                <span key="v6" className="welcome-gradient-title">
-                  V6
-                </span>
-              ),
-            },
-          )}
-          🎉
-        </>
-      }
+      title="DunFang BizHub"
+      subTitle="面向分销场景的业务协同与智能识别项目"
     >
-      <div
-        data-theme={isDark ? 'dark' : 'light'}
-        className="flex flex-col gap-6 md:flex-row"
-      >
-        <div className="min-w-0 md:flex-[2] welcome-markdown">
-          <Card>
-            <XMarkdown components={mdComponents} config={mdConfig}>
-              {content}
-            </XMarkdown>
-          </Card>
-        </div>
-        <div className="flex flex-1 flex-col gap-4">
-          {infoCards.map((card) => (
-            <InfoCard
-              key={card.href}
-              index={card.index}
-              href={card.href}
-              title={intl.formatMessage({
-                id: card.titleId,
-                defaultMessage: card.titleDefault,
-              })}
-              desc={intl.formatMessage({
-                id: card.descId,
-                defaultMessage: card.descDefault,
-              })}
-            />
+      <Space orientation="vertical" size={24} style={{ width: '100%' }}>
+        <Card>
+          <Space orientation="vertical" size={12} style={{ width: '100%' }}>
+            <Tag color="blue">校招求职演示项目</Tag>
+            <Title level={3} style={{ margin: 0 }}>
+              用一套前后端 + AI Worker 组合，覆盖订单、仓储、租户和发票识别主链路
+            </Title>
+            <Paragraph style={{ marginBottom: 0 }}>
+              当前版本重点展示四条真实可讲的业务能力：认证与权限、公司主数据、销售与仓储操作链路，以及
+              AI 发票提取。页面和菜单已经收敛到面试演示所需的最小闭环。
+            </Paragraph>
+          </Space>
+        </Card>
+
+        <Row gutter={[16, 16]}>
+          {modules.map((module) => (
+            <Col key={module.title} xs={24} md={12}>
+              <Card
+                title={module.title}
+                extra={module.icon}
+                actions={[
+                  <Button key="open" type="link" onClick={module.action}>
+                    进入模块
+                  </Button>,
+                ]}
+              >
+                <Paragraph style={{ marginBottom: 0 }}>
+                  {module.description}
+                </Paragraph>
+              </Card>
+            </Col>
           ))}
-        </div>
-      </div>
+        </Row>
+
+        <Card title="项目摘要">
+          <Descriptions column={{ xs: 1, md: 2 }} bordered>
+            <Descriptions.Item label="前端">
+              React 19 + Umi Max + Ant Design Pro Components
+            </Descriptions.Item>
+            <Descriptions.Item label="后端">
+              Spring Boot 3.4 + MyBatis-Plus + Spring Security + JWT
+            </Descriptions.Item>
+            <Descriptions.Item label="AI 侧">
+              FastAPI + DashScope/Qwen-VL + 发票结构化提取
+            </Descriptions.Item>
+            <Descriptions.Item label="当前演示重点">
+              登录鉴权、多租户上下文、销售订单、仓储台账、发票识别
+            </Descriptions.Item>
+            <Descriptions.Item label="适合面试讲解的点">
+              契约统一、权限边界、页面收敛、接口联调、工程化验证
+            </Descriptions.Item>
+            <Descriptions.Item label="当前状态">
+              <Text strong>已收敛为可构建、可演示、可继续迭代的求职版基线</Text>
+            </Descriptions.Item>
+          </Descriptions>
+        </Card>
+      </Space>
     </PageContainer>
   );
 };
