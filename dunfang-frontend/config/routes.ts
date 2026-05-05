@@ -108,6 +108,18 @@ export default [
     ],
   },
   {
+    path: '/finance',
+    name: '财务与对账',
+    icon: 'payCircle',
+    routes: [
+      {
+        path: '/finance/invoice',
+        name: '发票智能提取',
+        component: './finance/invoice',
+      },
+    ],
+  },
+  {
     path: '/crm',
     name: '客户管理',
     icon: 'team',
