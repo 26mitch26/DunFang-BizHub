@@ -1,0 +1,39 @@
+# === Java / Maven ===
+target/
+*.class
+*.jar
+*.war
+*.log
+*.iml
+.idea/
+*.swp
+*~
+
+# === Node / Frontend ===
+node_modules/
+dist/
+.umi/
+.umi-production/
+.env.local
+
+# === Python ===
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# === OS ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === Docker ===
+docker-compose.override.yml
+
+# === IDE ===
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
