@@ -13,4 +13,11 @@ export default {
   'menu.wms.product': '商品档案',
   'menu.wms.warehouse': '仓库管理',
   'menu.wms.inventory': '实时库存',
+  'menu.crm': '客户关系',
+  'menu.crm.followUp': '客户跟进',
+  'menu.commission': '佣金管理',
+  'menu.commission.rule': '佣金规则',
+  'menu.commission.record': '佣金记录',
+  'menu.ai': 'AI 助手',
+  'menu.ai.assistant': '智能业务助手',
 };

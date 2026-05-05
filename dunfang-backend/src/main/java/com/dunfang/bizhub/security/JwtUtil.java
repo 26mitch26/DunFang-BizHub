@@ -88,4 +88,14 @@ public class JwtUtil {
     public List<String> getRoles(String token) {
         return parseToken(token).get("roles", List.class);
     }
+
+    public long getRemainingExpiration(String token) {
+        try {
+            Date exp = parseToken(token).getExpiration();
+            long remaining = exp.getTime() - System.currentTimeMillis();
+            return Math.max(remaining, 0);
+        } catch (JwtException e) {
+            return 0;
+        }
+    }
 }

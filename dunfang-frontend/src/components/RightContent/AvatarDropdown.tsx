@@ -4,7 +4,7 @@ import type { MenuProps } from 'antd';
 import { Spin } from 'antd';
 import React from 'react';
 import { flushSync } from 'react-dom';
-import { clearAuthSession } from '@/services/dunfang/auth';
+import { logout as apiLogout } from '@/services/dunfang/auth';
 import HeaderDropdown from '../HeaderDropdown';
 
 export type GlobalHeaderRightProps = {
@@ -16,8 +16,8 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({
 }) => {
   const { initialState, setInitialState } = useModel('@@initialState');
 
-  const loginOut = () => {
-    clearAuthSession();
+  const loginOut = async () => {
+    await apiLogout();
     const { search, pathname } = window.location;
     const urlParams = new URL(window.location.href).searchParams;
     const searchParams = new URLSearchParams({

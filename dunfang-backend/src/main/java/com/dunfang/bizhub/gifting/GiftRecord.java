@@ -12,6 +12,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode(callSuper = true)
 @TableName("gift_record")
 public class GiftRecord extends BaseEntity {
+    private Long companyId;
     private Long customerId;
     private Long festivalId;
     private String giftName;

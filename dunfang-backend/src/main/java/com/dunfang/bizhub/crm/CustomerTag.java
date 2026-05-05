@@ -9,6 +9,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @TableName("crm_customer_tag")
 public class CustomerTag extends BaseEntity {
+    private Long companyId;
     private Long customerId;
     private String tagName;
 }

@@ -13,4 +13,11 @@ export default {
   'menu.wms.product': 'Products',
   'menu.wms.warehouse': 'Warehouses',
   'menu.wms.inventory': 'Inventory',
+  'menu.crm': 'CRM',
+  'menu.crm.followUp': 'Follow-ups',
+  'menu.commission': 'Commission',
+  'menu.commission.rule': 'Rules',
+  'menu.commission.record': 'Records',
+  'menu.ai': 'AI Assistant',
+  'menu.ai.assistant': 'Business Agent',
 };

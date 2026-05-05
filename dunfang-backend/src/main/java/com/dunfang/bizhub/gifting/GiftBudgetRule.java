@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 @EqualsAndHashCode(callSuper = true)
 @TableName("gift_budget_rule")
 public class GiftBudgetRule extends BaseEntity {
+    private Long companyId;
     private String customerLevel; // A, B, C, D
     private Long festivalId;
     private BigDecimal budgetLimit;

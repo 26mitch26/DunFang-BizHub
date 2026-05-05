@@ -111,4 +111,73 @@ declare namespace API {
     matchedOrderId?: number | null;
     status?: string;
   };
+
+  type FollowUpRecord = {
+    id?: number;
+    customerId?: number;
+    contactPerson?: string;
+    followType?: 'VISIT' | 'CALL' | 'MESSAGE' | 'OTHER';
+    content?: string;
+    nextFollowDate?: string;
+    createdAt?: string;
+  };
+
+  type CustomerRecord = {
+    id: number;
+    name: string;
+    contactPerson?: string;
+    contactPhone?: string;
+    contactEmail?: string;
+    region?: string;
+    tier?: string;
+    remark?: string;
+    createdAt?: string;
+  };
+
+  type CommissionRuleRecord = {
+    id?: number;
+    brandId?: number;
+    ruleName?: string;
+    calcType?: 'FIXED_RATE' | 'TIERED' | 'FIXED_AMOUNT';
+    fixedRate?: number;
+    fixedAmount?: number;
+    tiers?: string;
+    version?: number;
+    effectiveFrom?: string;
+    effectiveTo?: string;
+    status?: string;
+  };
+
+  type CommissionRecordItem = {
+    id?: number;
+    orderId?: number;
+    ruleId?: number;
+    orderAmount?: number;
+    commissionAmount?: number;
+    status?: string;
+    createdAt?: string;
+  };
+
+  type LoginParams = {
+    email: string;
+    password: string;
+  };
+
+  type CurrentUser = {
+    userId?: number;
+    userid?: string;
+    name?: string;
+    nickname?: string;
+    email?: string;
+    avatar?: string;
+    roles?: string[];
+    access?: string;
+  };
+
+  type PageParams = {
+    current?: number;
+    pageSize?: number;
+    size?: number;
+    [key: string]: any;
+  };
 }

@@ -2,102 +2,214 @@ import {
   ApartmentOutlined,
   BarcodeOutlined,
   FileSearchOutlined,
+  MoneyCollectOutlined,
   ShoppingCartOutlined,
+  TeamOutlined,
+  WarningOutlined,
 } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
-import { history } from '@umijs/max';
-import { Button, Card, Col, Descriptions, Row, Space, Tag, Typography } from 'antd';
+import { history, useRequest } from '@umijs/max';
+import { Button, Card, Col, Descriptions, List, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import React from 'react';
 
-const { Paragraph, Text, Title } = Typography;
+import {
+  getDashboardSummary,
+  getLowStockItems,
+  getPendingFollowUps,
+} from '@/services/dunfang/dashboard';
 
-const modules = [
-  {
-    title: '公司主数据',
-    description: '公司档案维护、租户归属和基础权限入口。',
-    icon: <ApartmentOutlined />,
-    action: () => history.push('/admin/company'),
-  },
-  {
-    title: '销售订单',
-    description: '订单创建、确认和明细追踪。',
-    icon: <ShoppingCartOutlined />,
-    action: () => history.push('/sales/order'),
-  },
-  {
-    title: '仓储管理',
-    description: '商品档案、仓库和批次库存三条主链路。',
-    icon: <BarcodeOutlined />,
-    action: () => history.push('/wms/product'),
-  },
-  {
-    title: '发票识别',
-    description: 'AI Worker 驱动的发票提取与对账演示。',
-    icon: <FileSearchOutlined />,
-    action: () => history.push('/finance/invoice'),
-  },
-] as const;
+dayjs.extend(relativeTime);
+
+const { Paragraph, Text } = Typography;
+
+const QuickLinkCard: React.FC<{
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  path: string;
+}> = ({ title, description, icon, path }) => (
+  <Card
+    title={title}
+    extra={icon}
+    actions={[
+      <Button key="open" type="link" onClick={() => history.push(path)}>
+        进入模块
+      </Button>,
+    ]}
+  >
+    <Paragraph style={{ marginBottom: 0 }}>{description}</Paragraph>
+  </Card>
+);
 
 const Welcome: React.FC = () => {
-  return (
-    <PageContainer
-      title="DunFang BizHub"
-      subTitle="面向分销场景的业务协同与智能识别项目"
-    >
-      <Space orientation="vertical" size={24} style={{ width: '100%' }}>
-        <Card>
-          <Space orientation="vertical" size={12} style={{ width: '100%' }}>
-            <Tag color="blue">校招求职演示项目</Tag>
-            <Title level={3} style={{ margin: 0 }}>
-              用一套前后端 + AI Worker 组合，覆盖订单、仓储、租户和发票识别主链路
-            </Title>
-            <Paragraph style={{ marginBottom: 0 }}>
-              当前版本重点展示四条真实可讲的业务能力：认证与权限、公司主数据、销售与仓储操作链路，以及
-              AI 发票提取。页面和菜单已经收敛到面试演示所需的最小闭环。
-            </Paragraph>
-          </Space>
-        </Card>
+  const { data: summaryData } = useRequest(getDashboardSummary, {
+    formatResult: (res) => res?.data,
+  });
+  const { data: lowStockData } = useRequest(getLowStockItems, {
+    formatResult: (res) => res?.data,
+  });
+  const { data: pendingData } = useRequest(getPendingFollowUps, {
+    formatResult: (res) => res?.data,
+  });
 
+  const summary = summaryData ?? {};
+
+  return (
+    <PageContainer title="DunFang BizHub" subTitle="面向分销场景的业务协同与智能识别平台">
+      <Space direction="vertical" size={24} style={{ width: '100%' }}>
         <Row gutter={[16, 16]}>
-          {modules.map((module) => (
-            <Col key={module.title} xs={24} md={12}>
-              <Card
-                title={module.title}
-                extra={module.icon}
-                actions={[
-                  <Button key="open" type="link" onClick={module.action}>
-                    进入模块
-                  </Button>,
-                ]}
-              >
-                <Paragraph style={{ marginBottom: 0 }}>
-                  {module.description}
-                </Paragraph>
-              </Card>
-            </Col>
-          ))}
+          <Col xs={12} md={6}>
+            <Card>
+              <Statistic
+                title="今日订单数"
+                value={summary.todayOrderCount ?? 0}
+                prefix={<ShoppingCartOutlined />}
+              />
+            </Card>
+          </Col>
+          <Col xs={12} md={6}>
+            <Card>
+              <Statistic
+                title="今日订单金额"
+                value={summary.todayOrderAmount ?? 0}
+                precision={2}
+                prefix="¥"
+              />
+            </Card>
+          </Col>
+          <Col xs={12} md={6}>
+            <Card>
+              <Statistic
+                title="待跟进客户"
+                value={summary.pendingFollowUpCount ?? 0}
+                prefix={<TeamOutlined />}
+                valueStyle={{ color: summary.pendingFollowUpCount > 0 ? '#faad14' : undefined }}
+              />
+            </Card>
+          </Col>
+          <Col xs={12} md={6}>
+            <Card>
+              <Statistic
+                title="库存预警商品"
+                value={summary.lowStockItemCount ?? 0}
+                prefix={<WarningOutlined />}
+                valueStyle={{ color: summary.lowStockItemCount > 0 ? '#ff4d4f' : undefined }}
+              />
+            </Card>
+          </Col>
         </Row>
 
-        <Card title="项目摘要">
-          <Descriptions column={{ xs: 1, md: 2 }} bordered>
-            <Descriptions.Item label="前端">
-              React 19 + Umi Max + Ant Design Pro Components
-            </Descriptions.Item>
-            <Descriptions.Item label="后端">
-              Spring Boot 3.4 + MyBatis-Plus + Spring Security + JWT
-            </Descriptions.Item>
-            <Descriptions.Item label="AI 侧">
-              FastAPI + DashScope/Qwen-VL + 发票结构化提取
-            </Descriptions.Item>
-            <Descriptions.Item label="当前演示重点">
-              登录鉴权、多租户上下文、销售订单、仓储台账、发票识别
-            </Descriptions.Item>
-            <Descriptions.Item label="适合面试讲解的点">
-              契约统一、权限边界、页面收敛、接口联调、工程化验证
-            </Descriptions.Item>
-            <Descriptions.Item label="当前状态">
-              <Text strong>已收敛为可构建、可演示、可继续迭代的求职版基线</Text>
-            </Descriptions.Item>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} lg={12}>
+            <Card title="待跟进客户" size="small">
+              {pendingData && pendingData.length > 0 ? (
+                <List
+                  size="small"
+                  dataSource={pendingData.slice(0, 5)}
+                  renderItem={(item: API.FollowUpRecord) => (
+                    <List.Item>
+                      <List.Item.Meta
+                        title={`客户 #${item.customerId}`}
+                        description={
+                          <Space>
+                            <Tag color="blue">{item.followType === 'VISIT' ? '拜访' : item.followType === 'CALL' ? '电话' : item.followType === 'MESSAGE' ? '消息' : '其他'}</Tag>
+                            <Text ellipsis style={{ maxWidth: 200 }}>{item.content}</Text>
+                          </Space>
+                        }
+                      />
+                      <Text type="secondary">{item.nextFollowDate ? dayjs(item.nextFollowDate).fromNow() : '-'}</Text>
+                    </List.Item>
+                  )}
+                />
+              ) : (
+                <Text type="secondary">暂无待跟进记录</Text>
+              )}
+            </Card>
+          </Col>
+          <Col xs={24} lg={12}>
+            <Card title="库存预警 (可用 < 10)" size="small">
+              {lowStockData && lowStockData.length > 0 ? (
+                <Table
+                  size="small"
+                  pagination={false}
+                  dataSource={lowStockData}
+                  rowKey="productId"
+                  columns={[
+                    { title: 'SKU', dataIndex: 'skuCode', width: 120 },
+                    { title: '商品', dataIndex: 'productName', ellipsis: true },
+                    {
+                      title: '可用库存',
+                      dataIndex: 'available',
+                      width: 100,
+                      render: (val: number) => (
+                        <Text type={val <= 0 ? 'danger' : 'warning'} strong>{val}</Text>
+                      ),
+                    },
+                  ]}
+                />
+              ) : (
+                <Text type="secondary">库存充足，无预警</Text>
+              )}
+            </Card>
+          </Col>
+        </Row>
+
+        <Card title="订单总览">
+          <Row gutter={[16, 16]}>
+            <Col xs={8}>
+              <Statistic title="总订单数" value={summary.totalOrderCount ?? 0} />
+            </Col>
+            <Col xs={8}>
+              <Statistic title="草稿订单" value={summary.draftOrderCount ?? 0} valueStyle={{ color: '#faad14' }} />
+            </Col>
+            <Col xs={8}>
+              <Statistic title="已确认订单" value={summary.confirmedOrderCount ?? 0} valueStyle={{ color: '#52c41a' }} />
+            </Col>
+          </Row>
+        </Card>
+
+        <Card title="发票对账状态">
+          <Row gutter={[16, 16]}>
+            <Col xs={12}>
+              <Statistic title="已匹配发票" value={summary.matchedInvoiceCount ?? 0} valueStyle={{ color: '#52c41a' }} />
+            </Col>
+            <Col xs={12}>
+              <Statistic title="未匹配发票" value={summary.unmatchedInvoiceCount ?? 0} valueStyle={{ color: '#faad14' }} />
+            </Col>
+          </Row>
+        </Card>
+
+        <Card title="快速入口">
+          <Row gutter={[16, 16]}>
+            <Col xs={24} md={12} lg={8}>
+              <QuickLinkCard title="公司主数据" description="公司档案维护、租户归属和基础权限入口" icon={<ApartmentOutlined />} path="/admin/company" />
+            </Col>
+            <Col xs={24} md={12} lg={8}>
+              <QuickLinkCard title="销售订单" description="订单创建、确认和明细追踪" icon={<ShoppingCartOutlined />} path="/sales/order" />
+            </Col>
+            <Col xs={24} md={12} lg={8}>
+              <QuickLinkCard title="仓储管理" description="商品档案、仓库和批次库存管理" icon={<BarcodeOutlined />} path="/wms/product" />
+            </Col>
+            <Col xs={24} md={12} lg={8}>
+              <QuickLinkCard title="客户跟进" description="CRM 客户沟通记录与下次跟进计划" icon={<TeamOutlined />} path="/crm/follow-up" />
+            </Col>
+            <Col xs={24} md={12} lg={8}>
+              <QuickLinkCard title="佣金管理" description="佣金规则配置与计算记录" icon={<MoneyCollectOutlined />} path="/commission/rule" />
+            </Col>
+            <Col xs={24} md={12} lg={8}>
+              <QuickLinkCard title="发票识别" description="AI Worker 驱动的发票提取与对账" icon={<FileSearchOutlined />} path="/finance/invoice" />
+            </Col>
+          </Row>
+        </Card>
+
+        <Card title="项目技术摘要">
+          <Descriptions column={{ xs: 1, md: 2 }} bordered size="small">
+            <Descriptions.Item label="前端">React 19 + Umi Max + Ant Design Pro Components</Descriptions.Item>
+            <Descriptions.Item label="后端">Spring Boot 3.4 + MyBatis-Plus + Spring Security + JWT + Redis</Descriptions.Item>
+            <Descriptions.Item label="AI 侧">FastAPI + DashScope/Qwen-VL + 发票结构化提取</Descriptions.Item>
+            <Descriptions.Item label="架构亮点">多租户数据隔离、Redis 三场景落地、策略模式佣金引擎</Descriptions.Item>
           </Descriptions>
         </Card>
       </Space>

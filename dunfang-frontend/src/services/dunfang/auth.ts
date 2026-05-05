@@ -44,6 +44,18 @@ export async function register(body: API.RegisterParams) {
   });
 }
 
+export async function logout() {
+  const refreshTokenValue = localStorage.getItem(REFRESH_TOKEN_KEY);
+  try {
+    await request('/api/auth/logout', {
+      method: 'POST',
+      params: refreshTokenValue ? { refreshToken: refreshTokenValue } : {},
+    });
+  } finally {
+    clearAuthSession();
+  }
+}
+
 export async function refreshToken(refreshToken: string) {
   return request<API.Result<API.TokenResponse>>('/api/auth/refresh', {
     method: 'POST',

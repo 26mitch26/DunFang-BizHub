@@ -64,6 +64,43 @@ export default [
     ],
   },
   {
+    path: '/crm',
+    name: 'crm',
+    icon: 'team',
+    routes: [
+      {
+        path: '/crm',
+        redirect: '/crm/follow-up',
+      },
+      {
+        path: '/crm/follow-up',
+        name: 'followUp',
+        component: './crm/follow-up',
+      },
+    ],
+  },
+  {
+    path: '/commission',
+    name: 'commission',
+    icon: 'moneyCollect',
+    routes: [
+      {
+        path: '/commission',
+        redirect: '/commission/rule',
+      },
+      {
+        path: '/commission/rule',
+        name: 'rule',
+        component: './commission/rule',
+      },
+      {
+        path: '/commission/record',
+        name: 'record',
+        component: './commission/record',
+      },
+    ],
+  },
+  {
     path: '/finance',
     name: 'finance',
     icon: 'payCircle',
@@ -102,6 +139,22 @@ export default [
         path: '/wms/inventory',
         name: 'inventory',
         component: './wms/inventory',
+      },
+    ],
+  },
+  {
+    path: '/ai',
+    name: 'ai',
+    icon: 'robot',
+    routes: [
+      {
+        path: '/ai',
+        redirect: '/ai/assistant',
+      },
+      {
+        path: '/ai/assistant',
+        name: 'assistant',
+        component: './ai/assistant',
       },
     ],
   },

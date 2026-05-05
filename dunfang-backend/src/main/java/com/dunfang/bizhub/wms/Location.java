@@ -9,6 +9,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @TableName("wms_location")
 public class Location extends BaseEntity {
+    private Long companyId;
     private Long warehouseId;
     private String code;
     private String remark;

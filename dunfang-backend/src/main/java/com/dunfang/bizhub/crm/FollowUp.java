@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 @TableName("crm_follow_up")
 public class FollowUp extends BaseEntity {
+    private Long companyId;
     private Long customerId;
     private String contactPerson;
     private String followType; // VISIT, CALL, MESSAGE, OTHER

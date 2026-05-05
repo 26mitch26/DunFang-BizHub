@@ -1,0 +1,88 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------------< com.dunfang:dunfang-backend >---------------------
+[INFO] Building DunFang BizHub Backend 0.1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.4.5:run (default-cli) > test-compile @ dunfang-backend >>>
+[INFO] Artifact org.springframework.boot:spring-boot-starter-security:pom:3.4.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-starter-security:pom:3.4.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/springframework/boot/spring-boot-starter-security/3.4.5/spring-boot-starter-security-3.4.5.pom
+[INFO] Artifact org.springframework.boot:spring-boot-starter-validation:pom:3.4.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-starter-validation:pom:3.4.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/springframework/boot/spring-boot-starter-validation/3.4.5/spring-boot-starter-validation-3.4.5.pom
+[INFO] Artifact org.springframework.boot:spring-boot-starter-data-redis:pom:3.4.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-starter-data-redis:pom:3.4.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/springframework/boot/spring-boot-starter-data-redis/3.4.5/spring-boot-starter-data-redis-3.4.5.pom
+[INFO] Artifact com.baomidou:mybatis-plus-spring-boot3-starter:pom:3.5.10.1 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+[INFO] Artifact com.baomidou:mybatis-plus-spring-boot3-starter:pom:3.5.10.1 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/com/baomidou/mybatis-plus-spring-boot3-starter/3.5.10.1/mybatis-plus-spring-boot3-starter-3.5.10.1.pom
+[INFO] Artifact com.baomidou:mybatis-plus-jsqlparser:pom:3.5.10.1 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+[INFO] Artifact com.baomidou:mybatis-plus-jsqlparser:pom:3.5.10.1 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/com/baomidou/mybatis-plus-jsqlparser/3.5.10.1/mybatis-plus-jsqlparser-3.5.10.1.pom
+[INFO] Artifact org.flywaydb:flyway-core:pom:10.22.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+[INFO] Artifact org.flywaydb:flyway-core:pom:10.22.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/flywaydb/flyway-core/10.22.0/flyway-core-10.22.0.pom
+[INFO] Artifact org.flywaydb:flyway-mysql:pom:10.22.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+[INFO] Artifact org.flywaydb:flyway-mysql:pom:10.22.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/flywaydb/flyway-mysql/10.22.0/flyway-mysql-10.22.0.pom
+[INFO] Artifact io.jsonwebtoken:jjwt-api:pom:0.12.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+[INFO] Artifact io.jsonwebtoken:jjwt-api:pom:0.12.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/io/jsonwebtoken/jjwt-api/0.12.6/jjwt-api-0.12.6.pom
+[INFO] Artifact io.jsonwebtoken:jjwt-impl:pom:0.12.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+[INFO] Artifact io.jsonwebtoken:jjwt-impl:pom:0.12.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/io/jsonwebtoken/jjwt-impl/0.12.6/jjwt-impl-0.12.6.pom
+[INFO] Artifact io.jsonwebtoken:jjwt-jackson:pom:0.12.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+[INFO] Artifact io.jsonwebtoken:jjwt-jackson:pom:0.12.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/io/jsonwebtoken/jjwt-jackson/0.12.6/jjwt-jackson-0.12.6.pom
+[INFO] Artifact io.minio:minio:pom:8.5.14 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+[INFO] Artifact io.minio:minio:pom:8.5.14 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/io/minio/minio/8.5.14/minio-8.5.14.pom
+[INFO] Artifact org.springframework.security:spring-security-test:pom:6.4.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+[INFO] Artifact org.springframework.security:spring-security-test:pom:6.4.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/springframework/security/spring-security-test/6.4.5/spring-security-test-6.4.5.pom
+[INFO] Artifact cn.6tail:lunar:pom:1.7.7 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+[INFO] Artifact cn.6tail:lunar:pom:1.7.7 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases)]
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/cn/6tail/lunar/1.7.7/lunar-1.7.7.pom
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  2.759 s
+[INFO] Finished at: 2026-05-05T13:19:07+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal on project dunfang-backend: Could not collect dependencies for project com.dunfang:dunfang-backend:jar:0.1.0-SNAPSHOT
+[ERROR] Failed to read artifact descriptor for org.springframework.boot:spring-boot-starter-security:jar:3.4.5
+[ERROR] 	Caused by: The following artifacts could not be resolved: org.springframework.boot:spring-boot-starter-security:pom:3.4.5 (present, but unavailable): Could not transfer artifact org.springframework.boot:spring-boot-starter-security:pom:3.4.5 from/to aliyun-maven (https://maven.aliyun.com/repository/public): Remote host terminated the handshake
+[ERROR] Failed to read artifact descriptor for org.springframework.boot:spring-boot-starter-validation:jar:3.4.5
+[ERROR] 	Caused by: The following artifacts could not be resolved: org.springframework.boot:spring-boot-starter-validation:pom:3.4.5 (present, but unavailable): Could not transfer artifact org.springframework.boot:spring-boot-starter-validation:pom:3.4.5 from/to aliyun-maven (https://maven.aliyun.com/repository/public): Remote host terminated the handshake
+[ERROR] Failed to read artifact descriptor for org.springframework.boot:spring-boot-starter-data-redis:jar:3.4.5
+[ERROR] 	Caused by: The following artifacts could not be resolved: org.springframework.boot:spring-boot-starter-data-redis:pom:3.4.5 (present, but unavailable): Could not transfer artifact org.springframework.boot:spring-boot-starter-data-redis:pom:3.4.5 from/to aliyun-maven (https://maven.aliyun.com/repository/public): Remote host terminated the handshake
+[ERROR] Failed to read artifact descriptor for com.baomidou:mybatis-plus-spring-boot3-starter:jar:3.5.10.1
+[ERROR] 	Caused by: The following artifacts could not be resolved: com.baomidou:mybatis-plus-spring-boot3-starter:pom:3.5.10.1 (present, but unavailable): Could not transfer artifact com.baomidou:mybatis-plus-spring-boot3-starter:pom:3.5.10.1 from/to aliyun-maven (https://maven.aliyun.com/repository/public): Remote host terminated the handshake
+[ERROR] Failed to read artifact descriptor for com.baomidou:mybatis-plus-jsqlparser:jar:3.5.10.1
+[ERROR] 	Caused by: The following artifacts could not be resolved: com.baomidou:mybatis-plus-jsqlparser:pom:3.5.10.1 (present, but unavailable): Could not transfer artifact com.baomidou:mybatis-plus-jsqlparser:pom:3.5.10.1 from/to aliyun-maven (https://maven.aliyun.com/repository/public): Remote host terminated the handshake
+[ERROR] Failed to read artifact descriptor for org.flywaydb:flyway-core:jar:10.22.0
+[ERROR] 	Caused by: The following artifacts could not be resolved: org.flywaydb:flyway-core:pom:10.22.0 (present, but unavailable): Could not transfer artifact org.flywaydb:flyway-core:pom:10.22.0 from/to aliyun-maven (https://maven.aliyun.com/repository/public): Remote host terminated the handshake
+[ERROR] Failed to read artifact descriptor for org.flywaydb:flyway-mysql:jar:10.22.0
+[ERROR] 	Caused by: The following artifacts could not be resolved: org.flywaydb:flyway-mysql:pom:10.22.0 (present, but unavailable): Could not transfer artifact org.flywaydb:flyway-mysql:pom:10.22.0 from/to aliyun-maven (https://maven.aliyun.com/repository/public): Remote host terminated the handshake
+[ERROR] Failed to read artifact descriptor for io.jsonwebtoken:jjwt-api:jar:0.12.6
+[ERROR] 	Caused by: The following artifacts could not be resolved: io.jsonwebtoken:jjwt-api:pom:0.12.6 (present, but unavailable): Could not transfer artifact io.jsonwebtoken:jjwt-api:pom:0.12.6 from/to aliyun-maven (https://maven.aliyun.com/repository/public): Remote host terminated the handshake
+[ERROR] Failed to read artifact descriptor for io.jsonwebtoken:jjwt-impl:jar:0.12.6
+[ERROR] 	Caused by: The following artifacts could not be resolved: io.jsonwebtoken:jjwt-impl:pom:0.12.6 (present, but unavailable): Could not transfer artifact io.jsonwebtoken:jjwt-impl:pom:0.12.6 from/to aliyun-maven (https://maven.aliyun.com/repository/public): Remote host terminated the handshake
+[ERROR] Failed to read artifact descriptor for io.jsonwebtoken:jjwt-jackson:jar:0.12.6
+[ERROR] 	Caused by: The following artifacts could not be resolved: io.jsonwebtoken:jjwt-jackson:pom:0.12.6 (present, but unavailable): Could not transfer artifact io.jsonwebtoken:jjwt-jackson:pom:0.12.6 from/to aliyun-maven (https://maven.aliyun.com/repository/public): Remote host terminated the handshake
+[ERROR] Failed to read artifact descriptor for io.minio:minio:jar:8.5.14
+[ERROR] 	Caused by: The following artifacts could not be resolved: io.minio:minio:pom:8.5.14 (present, but unavailable): Could not transfer artifact io.minio:minio:pom:8.5.14 from/to aliyun-maven (https://maven.aliyun.com/repository/public): Remote host terminated the handshake
+[ERROR] Failed to read artifact descriptor for org.springframework.security:spring-security-test:jar:6.4.5
+[ERROR] 	Caused by: The following artifacts could not be resolved: org.springframework.security:spring-security-test:pom:6.4.5 (present, but unavailable): Could not transfer artifact org.springframework.security:spring-security-test:pom:6.4.5 from/to aliyun-maven (https://maven.aliyun.com/repository/public): Remote host terminated the handshake
+[ERROR] Failed to read artifact descriptor for cn.6tail:lunar:jar:1.7.7
+[ERROR] 	Caused by: The following artifacts could not be resolved: cn.6tail:lunar:pom:1.7.7 (present, but unavailable): Could not transfer artifact cn.6tail:lunar:pom:1.7.7 from/to aliyun-maven (https://maven.aliyun.com/repository/public): Remote host terminated the handshake
+[ERROR] 
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/DependencyResolutionException

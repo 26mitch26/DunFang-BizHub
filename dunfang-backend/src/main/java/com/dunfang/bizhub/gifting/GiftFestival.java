@@ -11,6 +11,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode(callSuper = true)
 @TableName("gift_festival")
 public class GiftFestival extends BaseEntity {
+    private Long companyId;
     private String name;
     private LocalDate festivalDate;
     private Integer lunarMonth;

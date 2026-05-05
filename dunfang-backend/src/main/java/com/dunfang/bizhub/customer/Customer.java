@@ -19,6 +19,7 @@ public class Customer extends BaseEntity {
     private String contactEmail;
     private String region;
     private String tier;
+    private String level;
     private LocalDate birthday;
     private LocalDate lastOrderDate;
     private String remark;

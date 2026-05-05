@@ -11,6 +11,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode(callSuper = true)
 @TableName("wms_delivery_task")
 public class DeliveryTask extends BaseEntity {
+    private Long companyId;
     private String taskNo;
     private String type; // INBOUND, OUTBOUND
     private Long relatedOrderId;

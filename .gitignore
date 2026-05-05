@@ -30,6 +30,11 @@ desktop.ini
 # === Docker ===
 docker-compose.override.yml
 
+# === Environment ===
+.env
+.env.local
+.env.production
+
 # === IDE ===
 .vscode/
 *.suo

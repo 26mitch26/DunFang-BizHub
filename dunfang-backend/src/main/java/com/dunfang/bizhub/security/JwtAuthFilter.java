@@ -22,13 +22,14 @@ import com.dunfang.bizhub.config.TenantContextHolder;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final JwtBlacklistService blacklistService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         String token = extractToken(request);
-        if (token != null && jwtUtil.validateToken(token)) {
+        if (token != null && jwtUtil.validateToken(token) && !blacklistService.isBlacklisted(token)) {
             Long userId = jwtUtil.getUserId(token);
             Long companyId = jwtUtil.getCompanyId(token);
             List<String> roles = jwtUtil.getRoles(token);

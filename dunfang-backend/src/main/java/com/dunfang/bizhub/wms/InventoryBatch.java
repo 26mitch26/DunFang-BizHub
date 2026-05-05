@@ -12,6 +12,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode(callSuper = true)
 @TableName("wms_inventory_batch")
 public class InventoryBatch extends BaseEntity {
+    private Long companyId;
     private Long warehouseId;
     private Long locationId;
     private Long productId;

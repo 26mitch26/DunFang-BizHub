@@ -5,7 +5,7 @@ services:
     image: mysql:8.0
     container_name: dunfang-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: dunfang2024
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-dunfang2024}
       MYSQL_DATABASE: dunfang_bizhub
       MYSQL_CHARACTER_SET_SERVER: utf8mb4
       MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
@@ -37,8 +37,8 @@ services:
     image: minio/minio:latest
     container_name: dunfang-minio
     environment:
-      MINIO_ROOT_USER: dunfang
-      MINIO_ROOT_PASSWORD: dunfang2024
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-dunfang}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-dunfang2024}
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -55,8 +55,8 @@ services:
     image: pgvector/pgvector:pg16
     container_name: dunfang-pgvector
     environment:
-      POSTGRES_USER: dunfang
-      POSTGRES_PASSWORD: dunfang2024
+      POSTGRES_USER: ${PG_USER:-dunfang}
+      POSTGRES_PASSWORD: ${PG_PASSWORD:-dunfang2024}
       POSTGRES_DB: dunfang_vector
     ports:
       - "5432:5432"
@@ -67,6 +67,51 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  backend:
+    build:
+      context: ./dunfang-backend
+      dockerfile: Dockerfile
+    container_name: dunfang-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_URL: jdbc:mysql://mysql:3306/dunfang_bizhub?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+      DB_USERNAME: root
+      DB_PASSWORD: ${DB_PASSWORD:-dunfang2024}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-dunfang-bizhub-jwt-secret-key-2024-must-be-at-least-256-bits-long}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-dunfang}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-dunfang2024}
+      AI_WORKER_URL: http://ai-worker:8001
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./dunfang-frontend
+      dockerfile: Dockerfile
+    container_name: dunfang-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+  ai-worker:
+    build:
+      context: ./dunfang-ai-worker
+      dockerfile: Dockerfile
+    container_name: dunfang-ai-worker
+    ports:
+      - "8001:8001"
+    environment:
+      DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-}
 
 volumes:
   mysql_data:

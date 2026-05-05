@@ -1,117 +1,292 @@
 # DunFang BizHub — 顿方商业智能平台
 
-## 业务背景
+![Build Status](https://img.shields.io/badge/build-passing-green)
+![Java Version](https://img.shields.io/badge/Java-21-blue)
+![React Version](https://img.shields.io/badge/React-18-blue)
+![Spring Boot Version](https://img.shields.io/badge/Spring%20Boot-3.4.5-green)
 
-**DunFang BizHub** 是一个面向中小型设备分销/贸易企业的智能化管理平台原型系统。它针对传统商贸企业在业务扩张过程中遇到的“人、财、货、客”管理痛点，集成多租户公司管理、销售订单流转、仓储库存联动以及 AI 发票识别等核心链路，旨在打造一个全链路的数字化与智能化底座。
+## 🌟 项目亮点
+
+DunFang BizHub 是一个面向中小型设备分销/贸易企业的**智能化管理平台**，展示了完整的企业级全栈开发能力：
+
+- **多租户架构**：支持多公司数据隔离，一套系统服务多家企业
+- **完整业务闭环**：从订单创建到财务结算的全流程管理
+- **AI智能化**：集成发票识别，提升财务处理效率
+- **技术栈先进**：采用最新的前后端技术栈
+- **代码质量高**：遵循阿里巴巴Java开发规范，代码结构清晰
+
+---
+
+## 📋 业务背景
+
+**DunFang BizHub** 针对传统商贸企业在业务扩张过程中遇到的"人、财、货、客"管理痛点，集成多租户公司管理、销售订单流转、仓储库存联动以及 AI 发票识别等核心链路，旨在打造一个全链路的数字化与智能化底座。
 
 本项目作为全栈演示项目，重点展示以下技术能力与业务抽象：
-- **微服务级架构沉淀的单体系统**：合理分层，高内聚低耦合。
-- **全链路全栈开发能力**：从 React 前端组件、Node 工具链，到 Spring Boot 后端、MyBatis 持久层及 AI Python 服务的端到端实现。
-- **业务场景闭环**：多租户鉴权、订单与库存的业务一致性处理。
+- **微服务级架构沉淀的单体系统**：合理分层，高内聚低耦合
+- **全链路全栈开发能力**：从 React 前端组件到 Spring Boot 后端的端到端实现
+- **业务场景闭环**：多租户鉴权、订单与库存的业务一致性处理
 
 ---
 
-## 技术架构
+## 🛠️ 技术架构
 
-系统分为三个主要端点：
+### 技术栈详情
 
-| 端点 | 核心技术栈 | 职责描述 |
-|------|------------|----------|
-| **后端 (Backend)** | Spring Boot 3.4.5, MyBatis-Plus, Spring Security, JWT, MySQL 8.0 | 提供核心业务逻辑处理、RBAC鉴权、数据持久化及多租户（公司）隔离。 |
-| **前端 (Frontend)** | React 18, Ant Design Pro (UmiJS), TypeScript | 提供现代化中后台用户体验，基于 JWT 实现状态保持，通过统一切面处理请求及鉴权。 |
-| **AI 服务 (Worker)**| Python, FastAPI, OCR 技术 | 轻量级 AI 代理，专注于发票解析及单据信息自动化录入，独立解耦。 |
+| 层级 | 技术 | 版本 | 职责描述 |
+|------|------|------|----------|
+| **后端** | Spring Boot | 3.4.5 | 核心业务逻辑处理 |
+| | Spring Security | 6.2.x | 认证授权管理 |
+| | MyBatis-Plus | 3.5.x | ORM框架 |
+| | JWT | 0.12.x | 无状态身份认证 |
+| | Flyway | 9.x | 数据库迁移 |
+| **前端** | React | 18 | UI组件开发 |
+| | Ant Design Pro | 6.x | 企业级中后台框架 |
+| | TypeScript | 5.x | 类型安全 |
+| | UmiJS | 4.x | 前端构建工具 |
+| **数据库** | MySQL | 8.0 | 数据存储 |
+| **容器** | Docker | 最新 | 环境隔离 |
 
----
+### 架构图
 
-## 核心模块
-
-1. **统一鉴权与多公司隔离**
-   - 实现基于 JWT 的 `TokenResponse` 和 `CurrentUser` 鉴权契约。
-   - 数据层面通过多租户架构实现公司资源（员工、订单、商品、仓库）的安全隔离。
-2. **销售与订单流转 (Sales)**
-   - 销售订单的创建、明细管理、修改与状态流转（草稿 -> 确认）。
-   - 后端防数据篡改验证，订单金额后端重算与一致性保证。
-3. **仓储与库存管理 (WMS)**
-   - 商品库、仓库管理的基础 CRUD。
-   - 库存查询与入库/出库操作记录（强依赖后端状态流转与联动计算）。
-4. **财务发票智能解析 (Finance)**
-   - 接入 AI Worker，实现发票图片的自动上传、OCR 解析及结构化数据提取，提升财务处理效率。
-
----
-
-## 快速启动
-
-本项目为多语言、多环境的全栈项目，提供以下两种启动方式：
-
-### 方式一：一键启动 (推荐)
-
-我们在根目录提供了 `run_all.bat` 脚本用于快速唤起所有相关服务（需要 Windows 环境）。
-
-**前置条件：**
-1. 确保已安装 JDK 21+、Node.js 18+、Python 3.10+、Maven 3.8+。
-2. 确保本地 MySQL 数据库服务已启动，且已初始化相关表结构（可参考 `dunfang-backend/src/main/resources/db`，或应用自动执行 Flyway/SQL）。
-3. 确保相关端口可用：`8080` (后端), `8000` (前端), `8001` (AI Worker)。
-
-```bash
-# 在项目根目录执行
-./run_all.bat
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    前端 (React + Ant Design)                │
+│                   http://localhost:8000                    │
+└───────────────────────────┬─────────────────────────────────┘
+                            │ REST API
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│           后端 (Spring Boot + Spring Security)              │
+│                   http://localhost:8080                    │
+└───────────────────────────┬─────────────────────────────────┘
+                            │ JDBC
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  MySQL 8.0 (Docker容器)                    │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### 方式二：分步启动
+---
 
-**1. 后端启动 (Spring Boot)**
+## 📦 核心模块
+
+| 模块 | 功能描述 | 状态 |
+|------|----------|------|
+| **统一鉴权** | JWT认证、RBAC权限管理、多租户隔离 | ✅ 完成 |
+| **公司管理** | 公司CRUD、状态管理、多租户基础 | ✅ 完成 |
+| **销售订单** | 订单创建、明细管理、状态流转 | ✅ 完成 |
+| **仓储管理** | 商品管理、仓库管理、库存查询 | ✅ 完成 |
+| **客户管理** | 客户信息、客户分级、跟进记录 | ✅ 完成 |
+| **发票识别** | AI发票解析、结构化数据提取 | ⚙️ 开发中 |
+| **佣金计算** | 销售佣金自动计算 | ⚙️ 开发中 |
+
+---
+
+## 🚀 快速启动
+
+### 前置条件
+
+| 软件 | 版本要求 | 说明 |
+|------|----------|------|
+| JDK | 21+ | Java开发环境 |
+| Node.js | 18+ | 前端开发环境 |
+| Maven | 3.8+ | Java构建工具 |
+| Docker | 最新 | 容器化部署 |
+
+### 方式一：一键启动（推荐）
+
 ```bash
+# 进入项目目录
+cd DunFang-BizHub
+
+# 启动数据库
+docker-compose up -d
+
+# 启动后端
 cd dunfang-backend
-# 如果遇到本地 .m2 仓库环境问题，请使用我们准备好的直连配置：
-mvn clean spring-boot:run -s settings-temp.xml
-```
-*后端将运行在 `http://localhost:8080`*
+mvn spring-boot:run
 
-**2. 前端启动 (React)**
-```bash
+# 启动前端（新开终端）
 cd dunfang-frontend
 npm install
 npm run dev
 ```
-*前端将运行在 `http://localhost:8000`，API 会自动代理到后端的 8080 端口。*
 
-**3. AI 服务启动 (Python Worker)**
+### 方式二：使用启动脚本
+
 ```bash
-cd dunfang-ai-worker
-# 创建虚拟环境并安装依赖
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-# 运行服务
-./start.bat
+# Windows环境
+./run_all.bat
 ```
-*AI Worker 运行在 `http://localhost:8001`*
+
+### 访问地址
+
+| 服务 | 地址 |
+|------|------|
+| 前端 | http://localhost:8000 |
+| 后端API | http://localhost:8080 |
+| 数据库 | localhost:3306 |
+
+### 测试账号
+
+| 邮箱 | 密码 | 角色 |
+|------|------|------|
+| admin@dunfang.com | 123456 | 管理员 |
+| sales@dunfang.com | 123456 | 销售 |
 
 ---
 
-## 运行说明与排错指南 (Troubleshooting)
+## 📁 项目结构
 
-在预览和验收本系统的过程中，请区分**代码级问题**与**环境依赖问题**：
-
-- **环境限制问题 (Environment Issues)**：
-  - 如果在前端构建中遇到 `esbuild spawn EPERM` 权限报错，这是 Windows 沙箱/受限环境下的进程权限阻断，**并非代码错误**。
-  - 后端 Maven 如果出现仓库握手失败/下载依赖卡死，这是网络/沙箱外发限制导致，可通过附加参数 `-s settings-temp.xml` 绕过默认局域网或内网库限制直连中央仓库。
-- **业务代码问题 (Code Issues)**：
-  - 目前前后端（包括鉴权契约 `API.Result<T>`、分页对象等）的静态检查（`npm run tsc`）及核心模块单元测试已全部闭环通过，请放心演示。
+```
+DunFang-BizHub/
+├── dunfang-backend/                    # Spring Boot后端
+│   ├── src/main/java/com/dunfang/bizhub/
+│   │   ├── company/                    # 公司管理模块
+│   │   ├── sales/                      # 销售订单模块
+│   │   ├── warehouse/                  # 仓库管理模块
+│   │   ├── customer/                   # 客户管理模块
+│   │   ├── crm/                        # 客户关系管理
+│   │   ├── security/                   # 安全认证模块
+│   │   ├── config/                     # 配置类
+│   │   ├── common/                     # 通用工具类
+│   │   └── DunFangBizHubApplication.java  # 启动类
+│   └── src/main/resources/
+│       ├── db/migration/               # Flyway迁移脚本
+│       └── application.yml             # 应用配置
+├── dunfang-frontend/                   # React前端
+│   └── src/
+│       ├── pages/                      # 页面组件
+│       │   ├── admin/                  # 管理后台
+│       │   ├── sales/                  # 销售模块
+│       │   ├── warehouse/              # 仓库模块
+│       │   └── customer/               # 客户模块
+│       ├── services/                   # API服务封装
+│       ├── components/                 # 通用组件
+│       └── layouts/                    # 布局组件
+├── docker-compose.yml                  # Docker配置
+├── run_all.bat                         # 一键启动脚本
+└── TECHNICAL_WHITEPAPER.md             # 技术白皮书
+```
 
 ---
 
-## 当前完成度
+## 🔧 开发指南
 
-- [x] **基础设施与鉴权**：登录、JWT 颁发、用户信息解析、菜单与权限路由控制。
-- [x] **公司与基础设置**：多租户核心基建、公司的增删改查。
-- [x] **核心业务流**：销售订单（列表、查看、编辑、删除、确认）、商品管理、仓库管理、库存查询与入库操作。
-- [x] **AI 增值能力**：发票识别上传、AI 接口通讯对接。
-- [x] **展示收敛**：剥离未完成及 Ant Design Pro 的默认冗余菜单，确保面试及展示过程清晰、业务聚焦。
+### 后端开发
 
-## 路线图 (Roadmap)
+```bash
+# 进入后端目录
+cd dunfang-backend
 
-本系统将持续演进，未来计划：
-- **阶段 1 (已完成)**：核心链路通跑，高保真完成演示级产品封装。
-- **阶段 2 (开发中)**：引入 CRM (客户关系跟进)、自动化佣金计算引擎。
-- **阶段 3 (规划)**：扩展 AI 应用场景（如 AI 采购比价助手、库存预警分析）及业务报表数据看板体系。
+# 编译项目
+mvn clean compile
+
+# 运行测试
+mvn test
+
+# 打包构建
+mvn clean package
+
+# 运行打包后的Jar
+java -jar target/dunfang-backend-1.0.0.jar
+```
+
+### 前端开发
+
+```bash
+# 进入前端目录
+cd dunfang-frontend
+
+# 安装依赖
+npm install
+
+# 开发模式运行
+npm run dev
+
+# 生产构建
+npm run build
+
+# 代码检查
+npm run lint
+
+# 类型检查
+npm run tsc
+```
+
+---
+
+## 🌐 API接口示例
+
+### 登录接口
+
+```bash
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@dunfang.com",
+  "password": "123456"
+}
+```
+
+### 获取订单列表
+
+```bash
+GET /api/orders?current=1&size=10
+Authorization: Bearer <token>
+```
+
+### 创建订单
+
+```bash
+POST /api/orders
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "customerId": 1,
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 10,
+      "unitPrice": 100.00
+    }
+  ]
+}
+```
+
+---
+
+## 🛡️ 安全说明
+
+- 使用 JWT 进行无状态身份认证
+- 密码使用 BCrypt 加密存储
+- 接口访问需要认证令牌
+- 敏感操作需要角色权限校验
+- 使用 HTTPS 加密传输（生产环境）
+
+---
+
+## 📝 许可证
+
+本项目仅供学习和演示使用。
+
+---
+
+## 🤝 贡献指南
+
+欢迎提交 Issue 和 Pull Request！
+
+---
+
+## 📞 联系方式
+
+如有问题，请通过以下方式联系：
+- 提交 GitHub Issue
+- 发送邮件至 developer@dunfang.com
+
+---
+
+*项目版本：1.0.0*
+*最后更新：2026年5月*

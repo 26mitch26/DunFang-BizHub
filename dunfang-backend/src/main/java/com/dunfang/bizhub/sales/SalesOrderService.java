@@ -1,21 +1,25 @@
 package com.dunfang.bizhub.sales;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.dunfang.bizhub.common.BizException;
-import com.dunfang.bizhub.commission.CommissionService;
-import lombok.RequiredArgsConstructor;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.dunfang.bizhub.commission.CommissionService;
+import com.dunfang.bizhub.common.BizException;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SalesOrderService {
@@ -23,6 +27,7 @@ public class SalesOrderService {
     private final SalesOrderMapper orderMapper;
     private final SalesOrderItemMapper itemMapper;
     private final CommissionService commissionService;
+    private final StringRedisTemplate redisTemplate;
 
     public IPage<SalesOrder> page(int current, int size, Long companyId, Long customerId, String status) {
         LambdaQueryWrapper<SalesOrder> wrapper = new LambdaQueryWrapper<>();
@@ -140,7 +145,11 @@ public class SalesOrderService {
 
     private String generateOrderNo() {
         String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        int random = ThreadLocalRandom.current().nextInt(1000, 9999);
-        return "SO" + date + random;
+        String redisKey = "order:seq:" + date;
+        Long seq = redisTemplate.opsForValue().increment(redisKey);
+        if (seq != null && seq == 1L) {
+            redisTemplate.expire(redisKey, java.time.Duration.ofDays(2));
+        }
+        return String.format("SO%s-%05d", date, seq != null ? seq : 1);
     }
 }

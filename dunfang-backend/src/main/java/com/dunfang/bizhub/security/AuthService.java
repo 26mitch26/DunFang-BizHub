@@ -1,13 +1,15 @@
 package com.dunfang.bizhub.security;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.dunfang.bizhub.common.BizException;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.dunfang.bizhub.common.BizException;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +20,8 @@ public class AuthService {
     private final SysUserRoleMapper userRoleMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final JwtBlacklistService blacklistService;
+    private final LoginRateLimiter loginRateLimiter;
 
     @Transactional
     public TokenResponse register(RegisterRequest req) {
@@ -57,15 +61,26 @@ public class AuthService {
         SysUser user = userMapper.selectOne(
                 new LambdaQueryWrapper<SysUser>().eq(SysUser::getEmail, req.getEmail()));
         if (user == null || !passwordEncoder.matches(req.getPassword(), user.getPasswordHash())) {
+            loginRateLimiter.checkAndRecordFailure(req.getEmail());
             throw new BizException(401, "Invalid email or password");
         }
         if (!"ACTIVE".equals(user.getStatus())) {
             throw new BizException(403, "Account is locked or disabled");
         }
 
+        loginRateLimiter.clearFailures(req.getEmail());
         List<String> roles = userMapper.selectRoleCodesByUserId(user.getId());
         List<String> permissions = userMapper.selectPermissionsByUserId(user.getId());
         return buildTokenResponse(user, roles, permissions);
+    }
+
+    public void logout(String accessToken, String refreshToken) {
+        if (accessToken != null) {
+            blacklistService.blacklist(accessToken);
+        }
+        if (refreshToken != null) {
+            blacklistService.blacklist(refreshToken);
+        }
     }
 
     public TokenResponse refreshToken(String refreshToken) {

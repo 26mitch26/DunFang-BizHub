@@ -9,6 +9,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @TableName("wms_product")
 public class Product extends BaseEntity {
+    private Long companyId;
     private String skuCode;
     private String name;
     private Long categoryId;

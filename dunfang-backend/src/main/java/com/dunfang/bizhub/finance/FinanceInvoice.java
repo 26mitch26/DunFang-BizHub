@@ -16,6 +16,7 @@ public class FinanceInvoice {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    private Long companyId;
     private String invoiceNo;
 
     private LocalDate invoiceDate;
