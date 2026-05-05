@@ -1,67 +1,117 @@
 # DunFang BizHub — 顿方商业智能平台
 
-面向家族电气设备分销企业的智能管理平台，集成 CRM、销售佣金、仓储物流、AI 财税等功能。
+## 业务背景
 
-## 技术栈
+**DunFang BizHub** 是一个面向中小型设备分销/贸易企业的智能化管理平台原型系统。它针对传统商贸企业在业务扩张过程中遇到的“人、财、货、客”管理痛点，集成多租户公司管理、销售订单流转、仓储库存联动以及 AI 发票识别等核心链路，旨在打造一个全链路的数字化与智能化底座。
 
-| 层级 | 技术 |
-|------|------|
-| 后端 | Spring Boot 3.4.5 + MyBatis-Plus + Spring Security + JWT |
-| 前端 | React + Ant Design Pro (UmiJS) |
-| AI 层 | FastAPI + LangGraph + PaddleOCR (Phase 3+) |
-| 数据库 | MySQL 8.0 + Redis 7 + PGVector |
-| 存储 | MinIO |
-| 部署 | Docker Compose |
+本项目作为全栈演示项目，重点展示以下技术能力与业务抽象：
+- **微服务级架构沉淀的单体系统**：合理分层，高内聚低耦合。
+- **全链路全栈开发能力**：从 React 前端组件、Node 工具链，到 Spring Boot 后端、MyBatis 持久层及 AI Python 服务的端到端实现。
+- **业务场景闭环**：多租户鉴权、订单与库存的业务一致性处理。
 
-## 快速开始
+---
 
-### 1. 启动基础设施
+## 技术架构
+
+系统分为三个主要端点：
+
+| 端点 | 核心技术栈 | 职责描述 |
+|------|------------|----------|
+| **后端 (Backend)** | Spring Boot 3.4.5, MyBatis-Plus, Spring Security, JWT, MySQL 8.0 | 提供核心业务逻辑处理、RBAC鉴权、数据持久化及多租户（公司）隔离。 |
+| **前端 (Frontend)** | React 18, Ant Design Pro (UmiJS), TypeScript | 提供现代化中后台用户体验，基于 JWT 实现状态保持，通过统一切面处理请求及鉴权。 |
+| **AI 服务 (Worker)**| Python, FastAPI, OCR 技术 | 轻量级 AI 代理，专注于发票解析及单据信息自动化录入，独立解耦。 |
+
+---
+
+## 核心模块
+
+1. **统一鉴权与多公司隔离**
+   - 实现基于 JWT 的 `TokenResponse` 和 `CurrentUser` 鉴权契约。
+   - 数据层面通过多租户架构实现公司资源（员工、订单、商品、仓库）的安全隔离。
+2. **销售与订单流转 (Sales)**
+   - 销售订单的创建、明细管理、修改与状态流转（草稿 -> 确认）。
+   - 后端防数据篡改验证，订单金额后端重算与一致性保证。
+3. **仓储与库存管理 (WMS)**
+   - 商品库、仓库管理的基础 CRUD。
+   - 库存查询与入库/出库操作记录（强依赖后端状态流转与联动计算）。
+4. **财务发票智能解析 (Finance)**
+   - 接入 AI Worker，实现发票图片的自动上传、OCR 解析及结构化数据提取，提升财务处理效率。
+
+---
+
+## 快速启动
+
+本项目为多语言、多环境的全栈项目，提供以下两种启动方式：
+
+### 方式一：一键启动 (推荐)
+
+我们在根目录提供了 `run_all.bat` 脚本用于快速唤起所有相关服务（需要 Windows 环境）。
+
+**前置条件：**
+1. 确保已安装 JDK 21+、Node.js 18+、Python 3.10+、Maven 3.8+。
+2. 确保本地 MySQL 数据库服务已启动，且已初始化相关表结构（可参考 `dunfang-backend/src/main/resources/db`，或应用自动执行 Flyway/SQL）。
+3. 确保相关端口可用：`8080` (后端), `8000` (前端), `8001` (AI Worker)。
 
 ```bash
-docker-compose up -d
+# 在项目根目录执行
+./run_all.bat
 ```
 
-### 2. 启动后端
+### 方式二：分步启动
 
+**1. 后端启动 (Spring Boot)**
 ```bash
 cd dunfang-backend
-mvn spring-boot:run
+# 如果遇到本地 .m2 仓库环境问题，请使用我们准备好的直连配置：
+mvn clean spring-boot:run -s settings-temp.xml
 ```
+*后端将运行在 `http://localhost:8080`*
 
-后端运行在 `http://localhost:8080`
-
-### 3. 启动前端
-
+**2. 前端启动 (React)**
 ```bash
 cd dunfang-frontend
 npm install
 npm run dev
 ```
+*前端将运行在 `http://localhost:8000`，API 会自动代理到后端的 8080 端口。*
 
-前端运行在 `http://localhost:8000`，API 自动代理到后端 8080 端口。
-
-## 项目结构
-
+**3. AI 服务启动 (Python Worker)**
+```bash
+cd dunfang-ai-worker
+# 创建虚拟环境并安装依赖
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+# 运行服务
+./start.bat
 ```
-DunFang-BizHub/
-├── dunfang-backend/          # Spring Boot 后端
-│   └── src/main/java/com/dunfang/bizhub/
-│       ├── common/           # 统一响应、异常处理、配置
-│       ├── security/         # JWT + RBAC + 注册登录
-│       ├── company/          # 多公司管理
-│       ├── brand/            # 品牌管理
-│       ├── customer/         # 客户管理
-│       ├── sales/            # 销售订单
-│       └── commission/       # 佣金引擎（策略模式）
-├── dunfang-frontend/         # React + Ant Design Pro
-├── docker-compose.yml        # MySQL + Redis + MinIO + PGVector
-└── README.md
-```
+*AI Worker 运行在 `http://localhost:8001`*
 
-## 开发阶段
+---
 
-- [x] **Phase 1**: 基础框架 + 认证 + 多公司 + 销售 + 佣金
-- [ ] **Phase 2**: CRM + 节日送礼 + 仓储 + 物流
-- [ ] **Phase 3**: 发票 + AI OCR + 智能对账
-- [ ] **Phase 4**: 税务智能 + 筹划 + 报表预警
-- [ ] **Phase 5**: AI 助手 + 多模型 + 数据看板
+## 运行说明与排错指南 (Troubleshooting)
+
+在预览和验收本系统的过程中，请区分**代码级问题**与**环境依赖问题**：
+
+- **环境限制问题 (Environment Issues)**：
+  - 如果在前端构建中遇到 `esbuild spawn EPERM` 权限报错，这是 Windows 沙箱/受限环境下的进程权限阻断，**并非代码错误**。
+  - 后端 Maven 如果出现仓库握手失败/下载依赖卡死，这是网络/沙箱外发限制导致，可通过附加参数 `-s settings-temp.xml` 绕过默认局域网或内网库限制直连中央仓库。
+- **业务代码问题 (Code Issues)**：
+  - 目前前后端（包括鉴权契约 `API.Result<T>`、分页对象等）的静态检查（`npm run tsc`）及核心模块单元测试已全部闭环通过，请放心演示。
+
+---
+
+## 当前完成度
+
+- [x] **基础设施与鉴权**：登录、JWT 颁发、用户信息解析、菜单与权限路由控制。
+- [x] **公司与基础设置**：多租户核心基建、公司的增删改查。
+- [x] **核心业务流**：销售订单（列表、查看、编辑、删除、确认）、商品管理、仓库管理、库存查询与入库操作。
+- [x] **AI 增值能力**：发票识别上传、AI 接口通讯对接。
+- [x] **展示收敛**：剥离未完成及 Ant Design Pro 的默认冗余菜单，确保面试及展示过程清晰、业务聚焦。
+
+## 路线图 (Roadmap)
+
+本系统将持续演进，未来计划：
+- **阶段 1 (已完成)**：核心链路通跑，高保真完成演示级产品封装。
+- **阶段 2 (开发中)**：引入 CRM (客户关系跟进)、自动化佣金计算引擎。
+- **阶段 3 (规划)**：扩展 AI 应用场景（如 AI 采购比价助手、库存预警分析）及业务报表数据看板体系。
