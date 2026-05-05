@@ -10,6 +10,7 @@ import {
   Space,
   Spin,
   Table,
+  Tag,
   Typography,
   Upload,
   message,
@@ -19,12 +20,17 @@ import React, { useMemo, useState } from 'react';
 import { parseInvoice } from '@/services/dunfang/invoice';
 
 const { Dragger } = Upload;
-const { Text, Title } = Typography;
+const { Paragraph, Text, Title } = Typography;
 
 type InvoiceItem = {
   name?: string;
   quantity?: number;
   unitPrice?: number;
+};
+
+const invoiceStatusMap: Record<string, { color: string; text: string }> = {
+  MATCHED: { color: 'success', text: '已匹配订单' },
+  UNMATCHED: { color: 'warning', text: '待人工核对' },
 };
 
 const InvoiceOCR: React.FC = () => {
@@ -90,14 +96,22 @@ const InvoiceOCR: React.FC = () => {
     }
   };
 
+  const currentStatus =
+    result?.status && invoiceStatusMap[result.status]
+      ? invoiceStatusMap[result.status]
+      : undefined;
+
   return (
-    <PageContainer title="发票智能提取">
-      <Space direction="vertical" size={16} style={{ width: '100%' }}>
+    <PageContainer
+      title="发票智能提取"
+      subTitle="上传发票图片，调用 AI Worker 解析结构化字段并尝试匹配销售订单"
+    >
+      <Space orientation="vertical" size={16} style={{ width: '100%' }}>
         <Card title="1. API Key">
           <Form layout="vertical">
             <Form.Item
               label="DashScope API Key"
-              tooltip="仅保存在当前浏览器，用于调用 AI Worker 背后的识别能力。"
+              tooltip="仅保存在当前浏览器中，用于调用 AI Worker 背后的识别能力。"
               required
             >
               <Input.Password
@@ -139,17 +153,17 @@ const InvoiceOCR: React.FC = () => {
               <Descriptions.Item label="开票日期">
                 {result.invoiceDate || '-'}
               </Descriptions.Item>
-              <Descriptions.Item label="购方名称">
+              <Descriptions.Item label="购买方名称">
                 {result.buyerName || '-'}
               </Descriptions.Item>
-              <Descriptions.Item label="购方税号">
+              <Descriptions.Item label="购买方税号">
                 {result.buyerTaxId || '-'}
               </Descriptions.Item>
-              <Descriptions.Item label="销方名称">
+              <Descriptions.Item label="销售方名称">
                 {result.sellerName || '-'}
               </Descriptions.Item>
-              <Descriptions.Item label="状态">
-                {result.status || '-'}
+              <Descriptions.Item label="匹配状态">
+                {currentStatus ? <Tag color={currentStatus.color}>{currentStatus.text}</Tag> : '-'}
               </Descriptions.Item>
               <Descriptions.Item label="价税合计">
                 <Text strong type="danger">
@@ -159,35 +173,41 @@ const InvoiceOCR: React.FC = () => {
               <Descriptions.Item label="税额">
                 {result.taxAmount ?? '-'}
               </Descriptions.Item>
+              <Descriptions.Item label="匹配订单 ID" span={2}>
+                {result.matchedOrderId ?? '未匹配'}
+              </Descriptions.Item>
             </Descriptions>
 
             <div style={{ marginTop: 24 }}>
               <Title level={5}>商品明细</Title>
-              <Table<InvoiceItem>
-                dataSource={items}
-                rowKey={(_, index) => String(index)}
-                pagination={false}
-                bordered
-                columns={[
-                  { title: '项目名称', dataIndex: 'name' },
-                  { title: '数量', dataIndex: 'quantity' },
-                  { title: '单价', dataIndex: 'unitPrice' },
-                  {
-                    title: '小计',
-                    render: (_, record) =>
-                      record.quantity && record.unitPrice
-                        ? (record.quantity * record.unitPrice).toFixed(2)
-                        : '-',
-                  },
-                ]}
-              />
+              {items.length > 0 ? (
+                <Table<InvoiceItem>
+                  dataSource={items}
+                  rowKey={(_, index) => String(index)}
+                  pagination={false}
+                  bordered
+                  columns={[
+                    { title: '项目名称', dataIndex: 'name' },
+                    { title: '数量', dataIndex: 'quantity' },
+                    { title: '单价', dataIndex: 'unitPrice' },
+                    {
+                      title: '小计',
+                      render: (_, record) =>
+                        record.quantity && record.unitPrice
+                          ? (record.quantity * record.unitPrice).toFixed(2)
+                          : '-',
+                    },
+                  ]}
+                />
+              ) : (
+                <Paragraph type="secondary" style={{ marginBottom: 0 }}>
+                  当前识别结果没有返回商品明细。
+                </Paragraph>
+              )}
             </div>
 
             <div style={{ marginTop: 24, textAlign: 'right' }}>
-              <Space>
-                <Button type="primary">保留识别结果</Button>
-                <Button onClick={() => setResult(null)}>重新上传</Button>
-              </Space>
+              <Button onClick={() => setResult(null)}>继续识别下一张</Button>
             </div>
           </Card>
         )}

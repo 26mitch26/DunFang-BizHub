@@ -18,6 +18,16 @@ import {
   updateCompany,
 } from '@/services/dunfang/company';
 
+const taxpayerTypeValueEnum = {
+  GENERAL: { text: '一般纳税人', status: 'Success' as const },
+  SMALL_SCALE: { text: '小规模纳税人', status: 'Default' as const },
+};
+
+const companyStatusValueEnum = {
+  ACTIVE: { text: '启用', status: 'Success' as const },
+  INACTIVE: { text: '停用', status: 'Error' as const },
+};
+
 const CompanyList: React.FC = () => {
   const actionRef = useRef<ActionType | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -86,6 +96,7 @@ const CompanyList: React.FC = () => {
     {
       title: '简称',
       dataIndex: 'shortName',
+      search: false,
     },
     {
       title: '税号',
@@ -94,10 +105,7 @@ const CompanyList: React.FC = () => {
     {
       title: '纳税人类型',
       dataIndex: 'taxpayerType',
-      valueEnum: {
-        GENERAL: { text: '一般纳税人', status: 'Success' },
-        SMALL_SCALE: { text: '小规模纳税人', status: 'Default' },
-      },
+      valueEnum: taxpayerTypeValueEnum,
     },
     {
       title: '法人',
@@ -112,10 +120,7 @@ const CompanyList: React.FC = () => {
     {
       title: '状态',
       dataIndex: 'status',
-      valueEnum: {
-        ACTIVE: { text: '启用', status: 'Success' },
-        INACTIVE: { text: '停用', status: 'Error' },
-      },
+      valueEnum: companyStatusValueEnum,
     },
     {
       title: '操作',
@@ -143,15 +148,16 @@ const CompanyList: React.FC = () => {
   ];
 
   return (
-    <PageContainer>
+    <PageContainer title="公司管理" subTitle="维护租户主体与开票抬头基础信息">
       <ProTable<API.CompanyRecord, API.PageParams>
         headerTitle="公司列表"
         actionRef={actionRef}
         rowKey="id"
-        search={{ labelWidth: 120 }}
+        search={{ labelWidth: 96 }}
         toolBarRender={() => [
           <Button key="create" type="primary" onClick={() => setCreateModalOpen(true)}>
-            <PlusOutlined /> 新建公司
+            <PlusOutlined />
+            新建公司
           </Button>,
         ]}
         request={async (params) => {
@@ -167,9 +173,10 @@ const CompanyList: React.FC = () => {
 
       <ModalForm<Partial<API.CompanyRecord>>
         title="新建公司"
-        width={600}
+        width={640}
         open={createModalOpen}
         onOpenChange={setCreateModalOpen}
+        initialValues={{ taxpayerType: 'GENERAL', status: 'ACTIVE' }}
         onFinish={async (values) => {
           const success = await handleAdd(values);
           if (success) {
@@ -191,12 +198,20 @@ const CompanyList: React.FC = () => {
         />
         <ProFormText name="legalPerson" label="法人" />
         <ProFormText name="contactPhone" label="联系电话" />
+        <ProFormSelect
+          name="status"
+          label="状态"
+          valueEnum={{
+            ACTIVE: '启用',
+            INACTIVE: '停用',
+          }}
+        />
         <ProFormTextArea name="address" label="地址" />
       </ModalForm>
 
       <ModalForm<Partial<API.CompanyRecord>>
         title="编辑公司"
-        width={600}
+        width={640}
         open={updateModalOpen}
         onOpenChange={(open) => {
           setUpdateModalOpen(open);
@@ -227,6 +242,14 @@ const CompanyList: React.FC = () => {
         />
         <ProFormText name="legalPerson" label="法人" />
         <ProFormText name="contactPhone" label="联系电话" />
+        <ProFormSelect
+          name="status"
+          label="状态"
+          valueEnum={{
+            ACTIVE: '启用',
+            INACTIVE: '停用',
+          }}
+        />
         <ProFormTextArea name="address" label="地址" />
       </ModalForm>
     </PageContainer>

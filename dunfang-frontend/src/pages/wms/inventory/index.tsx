@@ -25,7 +25,7 @@ const InventoryList: React.FC = () => {
   const [inboundModalOpen, setInboundModalOpen] = useState(false);
 
   const handleInbound = async (fields: InboundFormValue) => {
-    const hide = message.loading('正在入库');
+    const hide = message.loading('正在执行入库');
     try {
       await inboundInventory(fields);
       hide();
@@ -94,15 +94,16 @@ const InventoryList: React.FC = () => {
   ];
 
   return (
-    <PageContainer>
+    <PageContainer title="实时库存" subTitle="查看 FIFO 批次台账并执行手动入库">
       <ProTable<API.InventoryBatchRecord, API.PageParams>
-        headerTitle="实时库存"
+        headerTitle="库存批次列表"
         actionRef={actionRef}
         rowKey="id"
-        search={{ labelWidth: 120 }}
+        search={{ labelWidth: 96 }}
         toolBarRender={() => [
           <Button key="inbound" type="primary" onClick={() => setInboundModalOpen(true)}>
-            <PlusOutlined /> 手动入库
+            <PlusOutlined />
+            手动入库
           </Button>,
         ]}
         request={async (params) => {
@@ -118,7 +119,7 @@ const InventoryList: React.FC = () => {
 
       <ModalForm<InboundFormValue>
         title="手动入库"
-        width={520}
+        width={560}
         open={inboundModalOpen}
         onOpenChange={setInboundModalOpen}
         onFinish={async (values) => {

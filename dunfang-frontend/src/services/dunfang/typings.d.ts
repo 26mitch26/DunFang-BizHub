@@ -49,7 +49,10 @@ declare namespace API {
     orderNo?: string;
     companyId?: number;
     customerId?: number;
+    brandId?: number;
     totalAmount?: number;
+    costAmount?: number;
+    profitAmount?: number;
     status?: string;
     orderDate?: string;
     remark?: string;
@@ -60,6 +63,8 @@ declare namespace API {
     orderId?: number;
     productName?: string;
     productId?: number;
+    specification?: string;
+    unit?: string;
     quantity?: number;
     unitPrice?: number;
     totalPrice?: number;

@@ -33,7 +33,7 @@ export async function inboundInventory(
   options?: { [key: string]: any },
 ) {
   return request<API.Result<boolean>>('/api/wms/inventory/inbound', {
-    method: 'GET',
+    method: 'POST',
     params: data,
     ...(options || {}),
   });

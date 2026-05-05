@@ -45,8 +45,8 @@ public class SalesOrderController {
     }
 
     @PutMapping("/{id}")
-    public Result<SalesOrder> update(@PathVariable Long id, @RequestBody SalesOrder order) {
-        return Result.ok(orderService.update(id, order));
+    public Result<SalesOrder> update(@PathVariable Long id, @RequestBody CreateOrderRequest request) {
+        return Result.ok(orderService.update(id, request.getOrder(), request.getItems()));
     }
 
     @DeleteMapping("/{id}")

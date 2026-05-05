@@ -119,15 +119,16 @@ const WarehouseList: React.FC = () => {
   ];
 
   return (
-    <PageContainer>
+    <PageContainer title="仓库管理" subTitle="维护仓库主体与基础位置信息">
       <ProTable<API.WarehouseRecord, API.PageParams>
         headerTitle="仓库列表"
         actionRef={actionRef}
         rowKey="id"
-        search={{ labelWidth: 120 }}
+        search={{ labelWidth: 96 }}
         toolBarRender={() => [
           <Button key="create" type="primary" onClick={() => setCreateModalOpen(true)}>
-            <PlusOutlined /> 新建仓库
+            <PlusOutlined />
+            新建仓库
           </Button>,
         ]}
         request={async (params) => {
@@ -143,7 +144,7 @@ const WarehouseList: React.FC = () => {
 
       <ModalForm<Partial<API.WarehouseRecord>>
         title="新建仓库"
-        width={520}
+        width={560}
         open={createModalOpen}
         onOpenChange={setCreateModalOpen}
         onFinish={async (values) => {
@@ -161,7 +162,7 @@ const WarehouseList: React.FC = () => {
 
       <ModalForm<Partial<API.WarehouseRecord>>
         title="编辑仓库"
-        width={520}
+        width={560}
         open={updateModalOpen}
         onOpenChange={(open) => {
           setUpdateModalOpen(open);

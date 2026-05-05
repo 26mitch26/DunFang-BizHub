@@ -131,15 +131,16 @@ const ProductList: React.FC = () => {
   ];
 
   return (
-    <PageContainer>
+    <PageContainer title="商品档案" subTitle="维护销售与仓储共用的 SKU 主数据">
       <ProTable<API.ProductRecord, API.PageParams>
-        headerTitle="商品档案"
+        headerTitle="商品列表"
         actionRef={actionRef}
         rowKey="id"
-        search={{ labelWidth: 120 }}
+        search={{ labelWidth: 96 }}
         toolBarRender={() => [
           <Button key="create" type="primary" onClick={() => setCreateModalOpen(true)}>
-            <PlusOutlined /> 新建商品
+            <PlusOutlined />
+            新建商品
           </Button>,
         ]}
         request={async (params) => {
@@ -155,7 +156,7 @@ const ProductList: React.FC = () => {
 
       <ModalForm<Partial<API.ProductRecord>>
         title="新建商品"
-        width={520}
+        width={560}
         open={createModalOpen}
         onOpenChange={setCreateModalOpen}
         onFinish={async (values) => {
@@ -175,7 +176,7 @@ const ProductList: React.FC = () => {
 
       <ModalForm<Partial<API.ProductRecord>>
         title="编辑商品"
-        width={520}
+        width={560}
         open={updateModalOpen}
         onOpenChange={(open) => {
           setUpdateModalOpen(open);

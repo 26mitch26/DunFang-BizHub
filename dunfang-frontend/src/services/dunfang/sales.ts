@@ -42,6 +42,21 @@ export async function createOrder(
   });
 }
 
+export async function updateOrder(
+  id: number,
+  data: {
+    order: Partial<API.SalesOrderRecord>;
+    items: Array<Partial<API.SalesOrderItemRecord>>;
+  },
+  options?: { [key: string]: any },
+) {
+  return request<API.Result<API.SalesOrderRecord>>(`/api/orders/${id}`, {
+    method: 'PUT',
+    data,
+    ...(options || {}),
+  });
+}
+
 export async function confirmOrder(id: number, options?: { [key: string]: any }) {
   return request<API.Result<API.SalesOrderRecord>>(`/api/orders/${id}/confirm`, {
     method: 'POST',

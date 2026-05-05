@@ -12,6 +12,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -53,17 +54,17 @@ public class SalesOrderService {
 
     @Transactional
     public SalesOrder create(SalesOrder order, List<SalesOrderItem> items) {
+        validateItems(items);
         order.setOrderNo(generateOrderNo());
         if (order.getStatus() == null) {
             order.setStatus("DRAFT");
         }
+        fillOrderAmounts(order, items);
         orderMapper.insert(order);
 
-        if (items != null) {
-            for (SalesOrderItem item : items) {
-                item.setOrderId(order.getId());
-                itemMapper.insert(item);
-            }
+        for (SalesOrderItem item : items) {
+            item.setOrderId(order.getId());
+            itemMapper.insert(item);
         }
         return order;
     }
@@ -83,22 +84,58 @@ public class SalesOrderService {
         return order;
     }
 
-    public SalesOrder update(Long id, SalesOrder order) {
+    @Transactional
+    public SalesOrder update(Long id, SalesOrder order, List<SalesOrderItem> items) {
         SalesOrder existing = getById(id);
         if (!"DRAFT".equals(existing.getStatus())) {
             throw new BizException(400, "Only DRAFT orders can be edited");
         }
+        validateItems(items);
         order.setId(id);
+        order.setOrderNo(existing.getOrderNo());
+        order.setStatus(existing.getStatus());
+        fillOrderAmounts(order, items);
         orderMapper.updateById(order);
+        itemMapper.delete(new LambdaQueryWrapper<SalesOrderItem>().eq(SalesOrderItem::getOrderId, id));
+        for (SalesOrderItem item : items) {
+            item.setId(null);
+            item.setOrderId(id);
+            itemMapper.insert(item);
+        }
         return orderMapper.selectById(id);
     }
 
+    @Transactional
     public void delete(Long id) {
         SalesOrder existing = getById(id);
         if (!"DRAFT".equals(existing.getStatus()) && !"CANCELLED".equals(existing.getStatus())) {
             throw new BizException(400, "Only DRAFT or CANCELLED orders can be deleted");
         }
+        itemMapper.delete(new LambdaQueryWrapper<SalesOrderItem>().eq(SalesOrderItem::getOrderId, id));
         orderMapper.deleteById(id);
+    }
+
+    private void validateItems(List<SalesOrderItem> items) {
+        if (items == null || items.isEmpty()) {
+            throw new BizException(400, "Order items are required");
+        }
+    }
+
+    private void fillOrderAmounts(SalesOrder order, List<SalesOrderItem> items) {
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        for (SalesOrderItem item : items) {
+            if (item.getQuantity() == null || item.getQuantity() <= 0) {
+                throw new BizException(400, "Item quantity must be greater than 0");
+            }
+            if (item.getUnitPrice() == null) {
+                throw new BizException(400, "Item unit price is required");
+            }
+            BigDecimal lineTotal =
+                    item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+            item.setTotalPrice(lineTotal);
+            totalAmount = totalAmount.add(lineTotal);
+        }
+        order.setTotalAmount(totalAmount);
     }
 
     private String generateOrderNo() {
