@@ -26,15 +26,15 @@ public class JwtUtil {
         this.refreshExpiration = refreshExpiration;
     }
 
-    public String generateAccessToken(Long userId, String email, List<String> roles) {
-        return buildToken(userId, email, roles, accessExpiration);
+    public String generateAccessToken(Long userId, String email, Long companyId, List<String> roles, List<String> permissions) {
+        return buildToken(userId, email, companyId, roles, permissions, accessExpiration);
     }
 
     public String generateRefreshToken(Long userId, String email) {
-        return buildToken(userId, email, null, refreshExpiration);
+        return buildToken(userId, email, null, null, null, refreshExpiration);
     }
 
-    private String buildToken(Long userId, String email, List<String> roles, long expiration) {
+    private String buildToken(Long userId, String email, Long companyId, List<String> roles, List<String> permissions, long expiration) {
         JwtBuilder builder = Jwts.builder()
                 .subject(String.valueOf(userId))
                 .claim("email", email)
@@ -43,6 +43,12 @@ public class JwtUtil {
                 .signWith(key);
         if (roles != null) {
             builder.claim("roles", roles);
+        }
+        if (companyId != null) {
+            builder.claim("companyId", companyId.toString());
+        }
+        if (permissions != null) {
+            builder.claim("permissions", permissions);
         }
         return builder.compact();
     }
@@ -66,6 +72,16 @@ public class JwtUtil {
 
     public Long getUserId(String token) {
         return Long.parseLong(parseToken(token).getSubject());
+    }
+
+    public Long getCompanyId(String token) {
+        String companyId = parseToken(token).get("companyId", String.class);
+        return companyId != null ? Long.parseLong(companyId) : null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<String> getPermissions(String token) {
+        return parseToken(token).get("permissions", List.class);
     }
 
     @SuppressWarnings("unchecked")

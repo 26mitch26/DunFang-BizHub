@@ -44,8 +44,13 @@ public class AuthService {
         userRole.setRoleId(totalUsers <= 1 ? 1L : 2L); // First user = ADMIN, rest = SALES
         userRoleMapper.insert(userRole);
 
+        // Assign default companyId (1 for MVP test)
+        user.setCompanyId(1L);
+        userMapper.updateById(user);
+
         List<String> roles = userMapper.selectRoleCodesByUserId(user.getId());
-        return buildTokenResponse(user, roles);
+        List<String> permissions = userMapper.selectPermissionsByUserId(user.getId());
+        return buildTokenResponse(user, roles, permissions);
     }
 
     public TokenResponse login(LoginRequest req) {
@@ -59,7 +64,8 @@ public class AuthService {
         }
 
         List<String> roles = userMapper.selectRoleCodesByUserId(user.getId());
-        return buildTokenResponse(user, roles);
+        List<String> permissions = userMapper.selectPermissionsByUserId(user.getId());
+        return buildTokenResponse(user, roles, permissions);
     }
 
     public TokenResponse refreshToken(String refreshToken) {
@@ -72,11 +78,12 @@ public class AuthService {
             throw new BizException(401, "User not found");
         }
         List<String> roles = userMapper.selectRoleCodesByUserId(userId);
-        return buildTokenResponse(user, roles);
+        List<String> permissions = userMapper.selectPermissionsByUserId(userId);
+        return buildTokenResponse(user, roles, permissions);
     }
 
-    private TokenResponse buildTokenResponse(SysUser user, List<String> roles) {
-        String accessToken = jwtUtil.generateAccessToken(user.getId(), user.getEmail(), roles);
+    private TokenResponse buildTokenResponse(SysUser user, List<String> roles, List<String> permissions) {
+        String accessToken = jwtUtil.generateAccessToken(user.getId(), user.getEmail(), user.getCompanyId(), roles, permissions);
         String refreshToken = jwtUtil.generateRefreshToken(user.getId(), user.getEmail());
         return new TokenResponse(accessToken, refreshToken, user.getId(),
                 user.getEmail(), user.getNickname(), roles);

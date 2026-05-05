@@ -13,4 +13,9 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
             "INNER JOIN sys_user_role ur ON r.id = ur.role_id " +
             "WHERE ur.user_id = #{userId}")
     List<String> selectRoleCodesByUserId(Long userId);
+
+    @Select("SELECT rp.permission FROM sys_role_permission rp " +
+            "INNER JOIN sys_user_role ur ON rp.role_id = ur.role_id " +
+            "WHERE ur.user_id = #{userId}")
+    List<String> selectPermissionsByUserId(Long userId);
 }

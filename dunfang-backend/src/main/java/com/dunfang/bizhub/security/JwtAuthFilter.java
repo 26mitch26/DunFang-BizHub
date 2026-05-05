@@ -13,7 +13,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import com.dunfang.bizhub.config.TenantContextHolder;
 
 @Component
 @RequiredArgsConstructor
@@ -28,16 +30,31 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = extractToken(request);
         if (token != null && jwtUtil.validateToken(token)) {
             Long userId = jwtUtil.getUserId(token);
+            Long companyId = jwtUtil.getCompanyId(token);
             List<String> roles = jwtUtil.getRoles(token);
-            List<SimpleGrantedAuthority> authorities = roles != null
-                    ? roles.stream().map(r -> new SimpleGrantedAuthority("ROLE_" + r)).toList()
-                    : List.of();
+            List<String> permissions = jwtUtil.getPermissions(token);
+            
+            List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+            if (roles != null) {
+                roles.forEach(r -> authorities.add(new SimpleGrantedAuthority("ROLE_" + r)));
+            }
+            if (permissions != null) {
+                permissions.forEach(p -> authorities.add(new SimpleGrantedAuthority(p)));
+            }
+
+            if (companyId != null) {
+                TenantContextHolder.setTenantId(companyId);
+            }
 
             UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(userId, null, authorities);
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
-        filterChain.doFilter(request, response);
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            TenantContextHolder.clear();
+        }
     }
 
     private String extractToken(HttpServletRequest request) {

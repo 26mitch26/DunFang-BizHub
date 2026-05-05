@@ -10,6 +10,7 @@ import lombok.EqualsAndHashCode;
 @TableName("sys_user")
 public class SysUser extends BaseEntity {
 
+    private Long companyId;
     private String email;
     private String phone;
     private String passwordHash;
